@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#1c2024">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="受注管理">
-<meta name="description" content="受注検索・売上集計アプリ">
+<meta name="apple-mobile-web-app-title" content="見積管理">
+<meta name="description" content="見積もり検索・見積分析アプリ">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
-<title>受注検索・売上集計</title>
+<title>見積もり検索・見積分析</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -35,6 +35,8 @@
   --danger-bg:#fbeae6;
   --success:#2f7a4f;
   --success-bg:#e7f3ec;
+  --pending:#5b6472;
+  --pending-bg:#eceef1;
   --radius:12px;
   --radius-sm:8px;
   --font-display:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;
@@ -99,6 +101,7 @@ main{max-width:720px;margin:0 auto;padding:16px 16px calc(96px + var(--safe-bott
   letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;
 }
 .card-title::before{content:"";width:4px;height:14px;background:var(--brass-500);border-radius:2px;display:inline-block;}
+.card-sub{font-size:12px;color:var(--muted);margin:-6px 0 12px;}
 
 /* ---------- Forms ---------- */
 .field{margin-bottom:14px;}
@@ -143,13 +146,23 @@ main{max-width:720px;margin:0 auto;padding:16px 16px calc(96px + var(--safe-bott
 .toast.success{background:var(--success);}
 .toast.danger{background:var(--danger);}
 
-/* ---------- Quick period chips ---------- */
+/* ---------- Quick period / choice chips ---------- */
 .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
 .chip{
   padding:8px 14px;border-radius:999px;border:1.5px solid var(--steel-300);background:var(--steel-50);
   font-size:13px;font-weight:700;color:var(--graphite-700);cursor:pointer;
 }
 .chip.active{background:var(--graphite-800);border-color:var(--graphite-800);color:var(--brass-300);}
+.chip[data-result="won"].active{background:var(--success);border-color:var(--success);color:#fff;}
+.chip[data-result="lost"].active{background:var(--danger);border-color:var(--danger);color:#fff;}
+.chip[data-result="pending"].active{background:var(--pending);border-color:var(--pending);color:#fff;}
+
+/* ---------- Status badges ---------- */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+.badge-pending{background:var(--pending-bg);color:var(--pending);}
+.badge-won{background:var(--success-bg);color:var(--success);}
+.badge-lost{background:var(--danger-bg);color:var(--danger);}
 
 /* ---------- Summary plate ---------- */
 .summary-plate{
@@ -164,15 +177,21 @@ main{max-width:720px;margin:0 auto;padding:16px 16px calc(96px + var(--safe-bott
 .summary-item .value small{font-size:11px;font-weight:500;color:var(--steel-300);}
 @media (max-width:380px){.summary-item .value{font-size:14px;}}
 
-/* ---------- Order list / cards ---------- */
+/* ---------- Quote list / cards ---------- */
 .order-card{
   background:#fff;border:1px solid var(--steel-200);border-left:4px solid var(--brass-500);
   border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;
 }
-.order-card .top-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px;}
+.order-card.st-won{border-left-color:var(--success);}
+.order-card.st-lost{border-left-color:var(--danger);}
+.order-card.st-pending{border-left-color:var(--pending);}
+.order-card .top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px;}
+.order-card .company-wrap{min-width:0;}
 .order-card .company{font-weight:700;font-size:15px;color:var(--graphite-800);}
-.order-card .amount{font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--brass-600);white-space:nowrap;}
+.order-card .badge{margin-top:4px;}
+.order-card .amount{font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--brass-600);white-space:nowrap;flex:none;}
 .order-card .meta{font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;margin-bottom:8px;}
+.order-card .spec-line{font-size:12.5px;color:var(--graphite-700);background:var(--steel-50);border-radius:6px;padding:5px 8px;margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px 10px;}
 .order-card .note{font-size:12.5px;color:var(--graphite-600);background:var(--steel-50);border-radius:6px;padding:6px 8px;margin-bottom:8px;}
 .order-card .actions{display:flex;gap:8px;}
 
@@ -209,6 +228,21 @@ main{max-width:720px;margin:0 auto;padding:16px 16px calc(96px + var(--safe-bott
 .stat-cards .stat-value small{font-size:12px;color:var(--muted);font-weight:500;}
 .stat-wide{grid-column:1/-1;background:linear-gradient(160deg,var(--brass-050),#fff);border-color:var(--brass-300);}
 
+.result-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+@media (max-width:420px){.result-stat-grid{grid-template-columns:1fr 1fr;}}
+.result-stat{background:var(--steel-50);border:1px solid var(--steel-200);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;}
+.result-stat .n{font-family:var(--font-mono);font-weight:700;font-size:18px;}
+.result-stat .l{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px;}
+.result-stat.won .n{color:var(--success);}
+.result-stat.lost .n{color:var(--danger);}
+.result-stat.pending .n{color:var(--pending);}
+.result-stat.rate .n{color:var(--brass-600);}
+
+.amount-breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;}
+.amount-breakdown .box{background:var(--steel-50);border-radius:var(--radius-sm);padding:10px;text-align:center;}
+.amount-breakdown .box .v{font-family:var(--font-mono);font-weight:700;font-size:14px;}
+.amount-breakdown .box .l{font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px;}
+
 .bar-row{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;margin-bottom:9px;}
 .bar-rank{font-family:var(--font-mono);font-weight:700;font-size:12px;color:var(--muted);}
 .bar-track{background:var(--steel-100);border-radius:5px;height:22px;position:relative;overflow:hidden;}
@@ -218,6 +252,22 @@ main{max-width:720px;margin:0 auto;padding:16px 16px calc(96px + var(--safe-bott
 
 .month-bar-row{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;margin-bottom:8px;}
 .month-label{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
+.subhead{font-size:12.5px;font-weight:700;color:var(--graphite-700);margin:14px 0 8px;}
+.subhead:first-child{margin-top:0;}
+
+.company-status-card{border:1px solid var(--steel-200);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;background:var(--steel-50);}
+.company-status-card .name{font-weight:700;font-size:14px;margin-bottom:6px;color:var(--graphite-800);}
+.company-status-card .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;}
+@media (max-width:380px){.company-status-card .grid{grid-template-columns:1fr 1fr;}}
+.company-status-card .grid .item{text-align:center;}
+.company-status-card .grid .item b{display:block;font-family:var(--font-mono);font-size:14px;}
+.company-status-card .rate-line{margin-top:6px;font-size:12.5px;font-weight:700;color:var(--brass-600);text-align:right;}
+
+.material-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--steel-100);flex-wrap:wrap;}
+.material-row:last-child{border-bottom:none;}
+.material-row .m-name{font-weight:700;font-size:13.5px;min-width:88px;}
+.material-row .m-stats{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;}
+.material-row .m-stats b{color:var(--graphite-800);}
 
 /* ---------- Modal ---------- */
 .modal-overlay{
@@ -247,7 +297,6 @@ main{max-width:720px;margin:0 auto;padding:16px 16px calc(96px + var(--safe-bott
 .file-input-label{display:inline-block;}
 input[type=file]{display:none;}
 
-.select-native{position:relative;}
 select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%236b7480' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
 </style>
 </head>
@@ -255,24 +304,24 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="plate-badge">受</div>
+    <div class="plate-badge">見</div>
     <div class="topbar-titles">
-      <div class="brand">HOTMILK ORDER PLATE</div>
-      <div class="screen-name" id="screenTitle">受注登録</div>
+      <div class="brand">HOTMILK QUOTE PLATE</div>
+      <div class="screen-name" id="screenTitle">見積もり登録</div>
     </div>
   </div>
 </div>
 
 <main>
 
-  <!-- ============ 受注登録 ============ -->
+  <!-- ============ 見積もり登録 ============ -->
   <section class="screen active" id="screen-register" data-screen="register">
     <div class="card">
-      <div class="card-title" id="formCardTitle">新規受注の登録</div>
+      <div class="card-title" id="formCardTitle">新規見積もりの登録</div>
       <form id="orderForm">
         <div class="row2">
           <div class="field">
-            <label>受注日<span class="req">必須</span></label>
+            <label>見積日<span class="req">必須</span></label>
             <input type="date" id="f_orderDate" required>
           </div>
           <div class="field">
@@ -286,8 +335,8 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
         </div>
         <div class="row2">
           <div class="field">
-            <label>受注番号<span class="opt">任意</span></label>
-            <input type="text" id="f_orderNumber" placeholder="例）ORD-2026-001">
+            <label>見積番号<span class="opt">任意</span></label>
+            <input type="text" id="f_orderNumber" placeholder="例）EST-2026-001">
           </div>
           <div class="field">
             <label>担当者<span class="opt">任意</span></label>
@@ -298,9 +347,48 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
           <label>品名<span class="opt">任意</span></label>
           <input type="text" id="f_itemName" placeholder="例）ステンレス銘板 A社ロゴ入り">
         </div>
+        <div class="field">
+          <label>見積結果</label>
+          <select id="f_result">
+            <option value="pending">回答待ち</option>
+            <option value="won">受注</option>
+            <option value="lost">失注</option>
+          </select>
+        </div>
         <div class="row2">
           <div class="field">
-            <label>受注金額（円）<span class="req">必須</span></label>
+            <label>材質<span class="opt">任意</span></label>
+            <select id="f_material">
+              <option value="">選択してください</option>
+              <option value="アルミ">アルミ</option>
+              <option value="ステンレス">ステンレス</option>
+              <option value="真鍮">真鍮</option>
+              <option value="カラーアルマイト">カラーアルマイト</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>板厚（mm）<span class="opt">任意</span></label>
+            <input type="number" id="f_thickness" min="0" step="0.01" placeholder="例）2.0">
+          </div>
+        </div>
+        <div class="field" id="materialOtherField" style="display:none;">
+          <label>材質名（自由入力）</label>
+          <input type="text" id="f_materialOther" placeholder="例）チタン">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>縦サイズ（mm）<span class="opt">任意</span></label>
+            <input type="number" id="f_sizeV" min="0" step="0.1" placeholder="例）120">
+          </div>
+          <div class="field">
+            <label>横サイズ（mm）<span class="opt">任意</span></label>
+            <input type="number" id="f_sizeH" min="0" step="0.1" placeholder="例）300">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>見積金額（円）<span class="req">必須</span></label>
             <input type="number" id="f_amount" min="0" step="1" placeholder="0" required>
           </div>
           <div class="field">
@@ -320,12 +408,12 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     </div>
 
     <div class="card" id="recentCard">
-      <div class="card-title">最近登録した受注</div>
+      <div class="card-title">最近登録した見積もり</div>
       <div id="recentList"></div>
     </div>
   </section>
 
-  <!-- ============ 受注検索 ============ -->
+  <!-- ============ 見積もり検索 ============ -->
   <section class="screen" id="screen-search" data-screen="search">
     <div class="card">
       <div class="card-title">期間をワンタッチで指定</div>
@@ -336,6 +424,13 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
         <button class="chip" data-period="thisYear">今年</button>
         <button class="chip active" data-period="all">すべて</button>
       </div>
+      <div class="card-title">見積結果で絞り込み</div>
+      <div class="chip-row" id="resultChips">
+        <button class="chip active" data-result="">すべて</button>
+        <button class="chip" data-result="pending">回答待ちだけ</button>
+        <button class="chip" data-result="won">受注だけ</button>
+        <button class="chip" data-result="lost">失注だけ</button>
+      </div>
       <div class="card-title">絞り込み条件</div>
       <div class="filter-grid">
         <div class="field">
@@ -343,15 +438,15 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
           <input type="text" id="s_company" placeholder="例）TOTO">
         </div>
         <div class="field">
-          <label>受注番号</label>
+          <label>見積番号</label>
           <input type="text" id="s_orderNumber" placeholder="部分一致OK">
         </div>
         <div class="field">
-          <label>受注日（開始）</label>
+          <label>見積日（開始）</label>
           <input type="date" id="s_startDate">
         </div>
         <div class="field">
-          <label>受注日（終了）</label>
+          <label>見積日（終了）</label>
           <input type="date" id="s_endDate">
         </div>
         <div class="field">
@@ -362,6 +457,29 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
           <label>担当者</label>
           <input type="text" id="s_staff" placeholder="部分一致OK">
         </div>
+        <div class="field">
+          <label>材質</label>
+          <select id="s_material">
+            <option value="">すべて</option>
+            <option value="アルミ">アルミ</option>
+            <option value="ステンレス">ステンレス</option>
+            <option value="真鍮">真鍮</option>
+            <option value="カラーアルマイト">カラーアルマイト</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>板厚（mm）</label>
+          <input type="number" id="s_thickness" step="0.01" placeholder="例）2.0">
+        </div>
+        <div class="field">
+          <label>縦サイズ（mm）</label>
+          <input type="number" id="s_sizeV" step="0.1" placeholder="例）120">
+        </div>
+        <div class="field">
+          <label>横サイズ（mm）</label>
+          <input type="number" id="s_sizeH" step="0.1" placeholder="例）300">
+        </div>
       </div>
       <button class="btn btn-ghost btn-block" id="clearFilterBtn">条件をクリア</button>
     </div>
@@ -369,15 +487,15 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     <div class="summary-plate">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="label">該当件数</div>
+          <div class="label">該当見積件数</div>
           <div class="value nums" id="sumCount">0<small> 件</small></div>
         </div>
         <div class="summary-item">
-          <div class="label">売上合計</div>
+          <div class="label">見積金額合計</div>
           <div class="value nums" id="sumTotal">0<small> 円</small></div>
         </div>
         <div class="summary-item">
-          <div class="label">平均受注金額</div>
+          <div class="label">平均見積金額</div>
           <div class="value nums" id="sumAvg">0<small> 円</small></div>
         </div>
       </div>
@@ -387,8 +505,8 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
       <div class="field" style="margin-bottom:0;">
         <label>並べ替え</label>
         <select id="sortKey" class="sort-select">
-          <option value="date_desc">受注日：新しい順</option>
-          <option value="date_asc">受注日：古い順</option>
+          <option value="date_desc">見積日：新しい順</option>
+          <option value="date_asc">見積日：古い順</option>
           <option value="amount_desc">金額：高い順</option>
           <option value="amount_asc">金額：低い順</option>
           <option value="company">会社名順</option>
@@ -399,36 +517,75 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     <div id="searchResults"></div>
   </section>
 
-  <!-- ============ 売上分析 ============ -->
+  <!-- ============ 見積分析 ============ -->
   <section class="screen" id="screen-analysis" data-screen="analysis">
     <div class="stat-cards">
       <div class="card">
-        <div class="stat-label">今月の売上</div>
+        <div class="stat-label">今月の見積件数</div>
+        <div class="stat-value nums" id="an_thisMonthCount">0<small> 件</small></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">今月の見積金額合計</div>
         <div class="stat-value nums" id="an_thisMonth">0<small> 円</small></div>
       </div>
       <div class="card">
-        <div class="stat-label">先月の売上</div>
+        <div class="stat-label">先月の見積金額合計</div>
         <div class="stat-value nums" id="an_lastMonth">0<small> 円</small></div>
       </div>
-      <div class="card stat-wide">
-        <div class="stat-label">今年の売上</div>
+      <div class="card">
+        <div class="stat-label">今年の見積金額合計</div>
         <div class="stat-value nums" id="an_thisYear">0<small> 円</small></div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">会社別売上ランキング（売上上位10社）</div>
-      <div id="rankingList"></div>
+      <div class="card-title">見積結果の集計（全期間）</div>
+      <div class="result-stat-grid">
+        <div class="result-stat pending"><div class="n nums" id="an_pendingCount">0</div><div class="l">回答待ち</div></div>
+        <div class="result-stat won"><div class="n nums" id="an_wonCount">0</div><div class="l">受注</div></div>
+        <div class="result-stat lost"><div class="n nums" id="an_lostCount">0</div><div class="l">失注</div></div>
+        <div class="result-stat rate"><div class="n nums" id="an_winRate">—</div><div class="l">受注率</div></div>
+      </div>
+      <div class="amount-breakdown">
+        <div class="box"><div class="v nums" id="an_totalAmount">0円</div><div class="l">見積金額合計</div></div>
+        <div class="box"><div class="v nums" id="an_wonAmount">0円</div><div class="l">受注金額合計</div></div>
+        <div class="box"><div class="v nums" id="an_lostAmount">0円</div><div class="l">失注金額合計</div></div>
+      </div>
     </div>
 
     <div class="card">
-      <div class="card-title">月別売上推移</div>
+      <div class="card-title">会社別見積件数ランキング（上位10社）</div>
+      <div id="rankingCountList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">会社別見積金額ランキング（上位10社）</div>
+      <div id="rankingAmountList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">会社別の受注状況</div>
+      <div class="card-sub">見積件数の多い順に表示しています</div>
+      <div id="companyStatusList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">材質別の集計</div>
+      <div id="materialStatsList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">会社ごとの詳細</div>
       <div class="field" style="margin-bottom:12px;">
         <label>会社を選んで絞り込み</label>
         <select id="an_companySelect">
           <option value="">すべての会社（合計）</option>
         </select>
       </div>
+      <div id="companyDetail"></div>
+      <div class="subhead">月別見積件数推移</div>
+      <div id="monthlyCountTrend"></div>
+      <div class="subhead">月別見積金額推移</div>
       <div id="monthlyTrend"></div>
     </div>
   </section>
@@ -440,14 +597,14 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
       <div class="settings-row">
         <div>
           <div class="t">CSV出力</div>
-          <div class="d">登録済みの全受注データをCSVファイルとして保存します</div>
+          <div class="d">登録済みの全見積データをCSVファイルとして保存します</div>
         </div>
         <button class="btn btn-secondary btn-sm" id="exportCsvBtn">出力</button>
       </div>
       <div class="settings-row">
         <div>
           <div class="t">CSV読込</div>
-          <div class="d">CSVファイルから受注データを復元・追加します</div>
+          <div class="d">CSVファイルから見積データを復元・追加します</div>
         </div>
         <label class="file-input-label">
           <span class="btn btn-secondary btn-sm">読込</span>
@@ -461,14 +618,14 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
       <div class="settings-row">
         <div>
           <div class="t">登録件数</div>
-          <div class="d">現在この端末に保存されている受注データ</div>
+          <div class="d">現在この端末に保存されている見積データ</div>
         </div>
         <div class="nums" style="font-weight:700;" id="settingsCount">0 件</div>
       </div>
       <div class="settings-row">
         <div>
           <div class="t">全件削除</div>
-          <div class="d">登録済みの受注データをすべて削除します</div>
+          <div class="d">登録済みの見積データをすべて削除します</div>
         </div>
         <button class="btn btn-danger btn-sm" id="deleteAllBtn">削除</button>
       </div>
@@ -477,8 +634,8 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     <div class="card">
       <div class="card-title">保存場所について</div>
       <div class="info-box">
-        現在、受注データはこの端末のブラウザ内（localStorage）に保存されています。他の端末とは共有されません。<br><br>
-        将来的にクラウドデータベースへ切り替えることで、事務所のパソコンで登録した受注を社長のiPhoneからも検索できるようになる予定です。データの読み書きは内部的に共通の関数（保存機能）を通して行っているため、クラウド化の際もアプリの操作方法は変わりません。
+        現在、見積データはこの端末のブラウザ内（localStorage）に保存されています。他の端末とは共有されません。<br><br>
+        将来的にクラウドデータベースへ切り替えることで、事務所のパソコンで登録した見積もりを社長のiPhoneからも検索できるようになる予定です。データの読み書きは内部的に共通の関数（保存機能）を通して行っているため、クラウド化の際もアプリの操作方法は変わりません。
       </div>
     </div>
   </section>
@@ -489,15 +646,15 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   <div class="tabbar-inner">
     <button class="tab-btn active" data-goto="register">
       <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 9v6M9 12h6"/></svg>
-      <span>受注登録</span>
+      <span>見積登録</span>
     </button>
     <button class="tab-btn" data-goto="search">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>
-      <span>受注検索</span>
+      <span>見積検索</span>
     </button>
     <button class="tab-btn" data-goto="analysis">
       <svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>
-      <span>売上分析</span>
+      <span>見積分析</span>
     </button>
     <button class="tab-btn" data-goto="settings">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 000-2l2-1.5-2-3.4-2.3.9a8 8 0 00-1.8-1l-.3-2.5h-4l-.3 2.5a8 8 0 00-1.8 1l-2.3-.9-2 3.4L6.6 11a7.9 7.9 0 000 2l-2 1.5 2 3.4 2.3-.9a8 8 0 001.8 1l.3 2.5h4l.3-2.5a8 8 0 001.8-1l2.3.9 2-3.4z"/></svg>
@@ -513,7 +670,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   <div class="modal-sheet">
     <div class="modal-title">全件削除の確認</div>
     <div class="modal-text">
-      登録されている受注データを<b>すべて削除</b>します。この操作は取り消せません。<br><br>
+      登録されている見積データを<b>すべて削除</b>します。この操作は取り消せません。<br><br>
       よろしければ下の欄に「<b>削除する</b>」と入力してください。
     </div>
     <div class="field">
@@ -529,8 +686,8 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 <!-- 個別削除確認モーダル -->
 <div class="modal-overlay" id="deleteOneModal">
   <div class="modal-sheet">
-    <div class="modal-title">受注データの削除</div>
-    <div class="modal-text" id="deleteOneText">この受注データを削除します。よろしいですか？</div>
+    <div class="modal-title">見積データの削除</div>
+    <div class="modal-text" id="deleteOneText">この見積データを削除します。よろしいですか？</div>
     <div class="btn-row">
       <button class="btn btn-ghost" id="deleteOneCancelBtn">キャンセル</button>
       <button class="btn btn-danger" id="deleteOneConfirmBtn">削除する</button>
@@ -543,13 +700,28 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 
 /* =========================================================
    データ層（将来クラウド化しやすいよう非同期関数で統一）
+   ※ ストレージキー・内部フィールド名は旧バージョン（受注管理）から
+     変更していません。既存データはそのまま読み込まれます。
    ========================================================= */
+const MATERIAL_OPTIONS = ['アルミ','ステンレス','真鍮','カラーアルマイト','その他'];
+const RESULT_LABELS = { pending:'回答待ち', won:'受注', lost:'失注' };
+
+function normalizeOrder(o){
+  return Object.assign({
+    material: '', materialOther: '', thickness: '', sizeV: '', sizeH: '',
+    dueDate: '', staff: '', itemName: '', quantity: '', note: '', orderNumber: ''
+  }, o, {
+    result: (o.result === 'won' || o.result === 'lost') ? o.result : 'pending'
+  });
+}
+
 const StorageAPI = {
   KEY: 'hotmilk_orders_v1',
   async getAll(){
     try{
       const raw = localStorage.getItem(this.KEY);
-      return raw ? JSON.parse(raw) : [];
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list.map(normalizeOrder) : [];
     }catch(e){ console.error(e); return []; }
   },
   async saveAll(list){
@@ -627,13 +799,28 @@ function escHtml(s){
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
+function materialDisplay(o){
+  if(!o.material) return '';
+  if(o.material === 'その他') return o.materialOther ? o.materialOther : 'その他';
+  return o.material;
+}
+function materialCategory(o){
+  return MATERIAL_OPTIONS.includes(o.material) ? o.material : '';
+}
+function formatRate(rate){
+  return rate == null ? '—' : (Math.round(rate*10)/10).toFixed(1) + '%';
+}
+function badgeHTML(result){
+  const r = (result === 'won' || result === 'lost') ? result : 'pending';
+  return `<span class="badge badge-${r}">${RESULT_LABELS[r]}</span>`;
+}
 
 /* =========================================================
    状態
    ========================================================= */
 const state = {
   editingId: null,
-  filters: { company:'', startDate:'', endDate:'', orderNumber:'', itemName:'', staff:'' },
+  filters: { company:'', startDate:'', endDate:'', orderNumber:'', itemName:'', staff:'', material:'', thickness:'', sizeV:'', sizeH:'', result:'' },
   sortKey: 'date_desc',
   analysisCompany: '',
   activePeriod: 'all'
@@ -644,7 +831,7 @@ let ALL_ORDERS = [];
 /* =========================================================
    画面切り替え
    ========================================================= */
-const SCREEN_TITLES = { register:'受注登録', search:'受注検索', analysis:'売上分析', settings:'設定' };
+const SCREEN_TITLES = { register:'見積もり登録', search:'見積もり検索', analysis:'見積分析', settings:'設定' };
 function gotoScreen(name){
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.dataset.screen === name));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.goto === name));
@@ -659,20 +846,29 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 /* =========================================================
-   受注登録フォーム
+   見積もり登録フォーム
    ========================================================= */
 const form = document.getElementById('orderForm');
 const submitBtn = document.getElementById('submitBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 const formCardTitle = document.getElementById('formCardTitle');
+const materialSelect = document.getElementById('f_material');
+const materialOtherField = document.getElementById('materialOtherField');
+
+function syncMaterialOtherVisibility(){
+  materialOtherField.style.display = materialSelect.value === 'その他' ? '' : 'none';
+}
+materialSelect.addEventListener('change', syncMaterialOtherVisibility);
 
 function resetForm(){
   form.reset();
   document.getElementById('f_orderDate').value = todayISO();
+  document.getElementById('f_result').value = 'pending';
+  syncMaterialOtherVisibility();
   state.editingId = null;
   submitBtn.textContent = '登録する';
   cancelEditBtn.style.display = 'none';
-  formCardTitle.textContent = '新規受注の登録';
+  formCardTitle.textContent = '新規見積もりの登録';
 }
 
 function fillFormForEdit(order){
@@ -682,13 +878,20 @@ function fillFormForEdit(order){
   document.getElementById('f_orderNumber').value = order.orderNumber || '';
   document.getElementById('f_staff').value = order.staff || '';
   document.getElementById('f_itemName').value = order.itemName || '';
+  document.getElementById('f_result').value = order.result || 'pending';
+  document.getElementById('f_material').value = MATERIAL_OPTIONS.includes(order.material) ? order.material : '';
+  document.getElementById('f_materialOther').value = order.materialOther || '';
+  document.getElementById('f_thickness').value = order.thickness !== '' && order.thickness != null ? order.thickness : '';
+  document.getElementById('f_sizeV').value = order.sizeV !== '' && order.sizeV != null ? order.sizeV : '';
+  document.getElementById('f_sizeH').value = order.sizeH !== '' && order.sizeH != null ? order.sizeH : '';
   document.getElementById('f_amount').value = order.amount != null ? order.amount : '';
   document.getElementById('f_quantity').value = order.quantity != null ? order.quantity : '';
   document.getElementById('f_note').value = order.note || '';
+  syncMaterialOtherVisibility();
   state.editingId = order.id;
   submitBtn.textContent = '更新する';
   cancelEditBtn.style.display = '';
-  formCardTitle.textContent = '受注データの編集';
+  formCardTitle.textContent = '見積データの編集';
   gotoScreen('register');
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -701,9 +904,13 @@ form.addEventListener('submit', async (e)=>{
   const company = document.getElementById('f_company').value.trim();
   const amountRaw = document.getElementById('f_amount').value;
   if(!orderDate || !company || amountRaw === ''){
-    showToast('受注日・会社名・受注金額は必須です', 'danger');
+    showToast('見積日・会社名・見積金額は必須です', 'danger');
     return;
   }
+  const material = document.getElementById('f_material').value;
+  const thicknessRaw = document.getElementById('f_thickness').value;
+  const sizeVRaw = document.getElementById('f_sizeV').value;
+  const sizeHRaw = document.getElementById('f_sizeH').value;
   const payload = {
     orderDate,
     dueDate: document.getElementById('f_dueDate').value || '',
@@ -711,6 +918,12 @@ form.addEventListener('submit', async (e)=>{
     orderNumber: document.getElementById('f_orderNumber').value.trim(),
     staff: document.getElementById('f_staff').value.trim(),
     itemName: document.getElementById('f_itemName').value.trim(),
+    result: document.getElementById('f_result').value || 'pending',
+    material: material,
+    materialOther: material === 'その他' ? document.getElementById('f_materialOther').value.trim() : '',
+    thickness: thicknessRaw === '' ? '' : Number(thicknessRaw),
+    sizeV: sizeVRaw === '' ? '' : Number(sizeVRaw),
+    sizeH: sizeHRaw === '' ? '' : Number(sizeHRaw),
     amount: Math.round(Number(amountRaw)) || 0,
     quantity: document.getElementById('f_quantity').value === '' ? '' : Math.round(Number(document.getElementById('f_quantity').value)),
     note: document.getElementById('f_note').value.trim()
@@ -718,13 +931,13 @@ form.addEventListener('submit', async (e)=>{
 
   if(state.editingId){
     await StorageAPI.update(state.editingId, payload);
-    showToast('受注データを更新しました', 'success');
+    showToast('見積データを更新しました', 'success');
   }else{
     payload.id = uid();
     payload.createdAt = new Date().toISOString();
     payload.updatedAt = payload.createdAt;
     await StorageAPI.add(payload);
-    showToast('受注を登録しました', 'success');
+    showToast('見積もりを登録しました', 'success');
   }
   await reloadOrders();
   resetForm();
@@ -735,7 +948,7 @@ function renderRecentList(){
   const el = document.getElementById('recentList');
   const list = ALL_ORDERS.slice().sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,5);
   if(list.length === 0){
-    el.innerHTML = '<div class="empty-state"><div class="icon">🗂️</div>まだ受注データがありません</div>';
+    el.innerHTML = '<div class="empty-state"><div class="icon">🗂️</div>まだ見積データがありません</div>';
     return;
   }
   el.innerHTML = list.map(o => orderCardHTML(o)).join('');
@@ -743,23 +956,40 @@ function renderRecentList(){
 }
 
 /* =========================================================
-   受注カードHTML（共通）
+   見積カードHTML（共通）
    ========================================================= */
 function orderCardHTML(o){
   const metaParts = [];
-  metaParts.push(`受注日 ${formatDate(o.orderDate)}`);
+  metaParts.push(`見積日 ${formatDate(o.orderDate)}`);
   if(o.dueDate) metaParts.push(`納期 ${formatDate(o.dueDate)}`);
   if(o.orderNumber) metaParts.push(`No. ${escHtml(o.orderNumber)}`);
   if(o.quantity !== '' && o.quantity != null) metaParts.push(`数量 ${escHtml(o.quantity)}`);
   if(o.staff) metaParts.push(`担当 ${escHtml(o.staff)}`);
+
+  const specParts = [];
+  const mat = materialDisplay(o);
+  if(mat) specParts.push(`材質 ${escHtml(mat)}`);
+  if(o.thickness !== '' && o.thickness != null) specParts.push(`板厚 ${escHtml(o.thickness)}mm`);
+  if((o.sizeV !== '' && o.sizeV != null) || (o.sizeH !== '' && o.sizeH != null)){
+    const v = (o.sizeV !== '' && o.sizeV != null) ? o.sizeV : '?';
+    const h = (o.sizeH !== '' && o.sizeH != null) ? o.sizeH : '?';
+    specParts.push(`サイズ 縦${escHtml(v)}×横${escHtml(h)}mm`);
+  }
+
+  const result = (o.result === 'won' || o.result === 'lost') ? o.result : 'pending';
+
   return `
-  <div class="order-card" data-id="${o.id}">
+  <div class="order-card st-${result}" data-id="${o.id}">
     <div class="top-row">
-      <div class="company">${escHtml(o.company)}</div>
+      <div class="company-wrap">
+        <div class="company">${escHtml(o.company)}</div>
+        ${badgeHTML(result)}
+      </div>
       <div class="amount nums">${formatMoney(o.amount)}円</div>
     </div>
     ${o.itemName ? `<div class="meta" style="margin-bottom:2px;"><span>${escHtml(o.itemName)}</span></div>` : ''}
     <div class="meta">${metaParts.map(m=>`<span>${m}</span>`).join('')}</div>
+    ${specParts.length ? `<div class="spec-line">${specParts.map(m=>`<span>${m}</span>`).join('')}</div>` : ''}
     ${o.note ? `<div class="note">${escHtml(o.note)}</div>` : ''}
     <div class="actions">
       <button class="btn btn-ghost btn-sm" data-action="edit">編集</button>
@@ -790,8 +1020,8 @@ function openDeleteOneModal(id){
   pendingDeleteId = id;
   const order = ALL_ORDERS.find(o=>o.id===id);
   document.getElementById('deleteOneText').innerHTML =
-    order ? `<b>${escHtml(order.company)}</b>（${formatDate(order.orderDate)} / ${formatMoney(order.amount)}円）の受注データを削除します。よろしいですか？` :
-    'この受注データを削除します。よろしいですか？';
+    order ? `<b>${escHtml(order.company)}</b>（${formatDate(order.orderDate)} / ${formatMoney(order.amount)}円）の見積データを削除します。よろしいですか？` :
+    'この見積データを削除します。よろしいですか？';
   deleteOneModal.classList.add('show');
 }
 document.getElementById('deleteOneCancelBtn').addEventListener('click', ()=>{
@@ -812,10 +1042,11 @@ document.getElementById('deleteOneConfirmBtn').addEventListener('click', async (
 /* =========================================================
    検索・絞り込み
    ========================================================= */
-const searchIds = ['s_company','s_orderNumber','s_startDate','s_endDate','s_itemName','s_staff'];
-const filterKeyMap = { s_company:'company', s_orderNumber:'orderNumber', s_startDate:'startDate', s_endDate:'endDate', s_itemName:'itemName', s_staff:'staff' };
+const searchIds = ['s_company','s_orderNumber','s_startDate','s_endDate','s_itemName','s_staff','s_material','s_thickness','s_sizeV','s_sizeH'];
+const filterKeyMap = { s_company:'company', s_orderNumber:'orderNumber', s_startDate:'startDate', s_endDate:'endDate', s_itemName:'itemName', s_staff:'staff', s_material:'material', s_thickness:'thickness', s_sizeV:'sizeV', s_sizeH:'sizeH' };
 searchIds.forEach(id=>{
-  document.getElementById(id).addEventListener('input', ()=>{
+  const evt = document.getElementById(id).tagName === 'SELECT' ? 'change' : 'input';
+  document.getElementById(id).addEventListener(evt, ()=>{
     state.filters[filterKeyMap[id]] = document.getElementById(id).value;
     if(id === 's_startDate' || id === 's_endDate'){ setActivePeriodChip(null); }
     renderSearchResults();
@@ -824,8 +1055,9 @@ searchIds.forEach(id=>{
 
 document.getElementById('clearFilterBtn').addEventListener('click', ()=>{
   searchIds.forEach(id=> document.getElementById(id).value = '');
-  state.filters = { company:'', startDate:'', endDate:'', orderNumber:'', itemName:'', staff:'' };
+  state.filters = { company:'', startDate:'', endDate:'', orderNumber:'', itemName:'', staff:'', material:'', thickness:'', sizeV:'', sizeH:'', result:'' };
   setActivePeriodChip('all');
+  setActiveResultChip('');
   renderSearchResults();
 });
 
@@ -838,6 +1070,12 @@ function setActivePeriodChip(period){
   state.activePeriod = period;
   document.querySelectorAll('#periodChips .chip').forEach(c=>{
     c.classList.toggle('active', period && c.dataset.period === period);
+  });
+}
+function setActiveResultChip(result){
+  state.filters.result = result;
+  document.querySelectorAll('#resultChips .chip').forEach(c=>{
+    c.classList.toggle('active', c.dataset.result === result);
   });
 }
 
@@ -874,6 +1112,13 @@ document.querySelectorAll('#periodChips .chip').forEach(chip=>{
   });
 });
 
+document.querySelectorAll('#resultChips .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    setActiveResultChip(chip.dataset.result);
+    renderSearchResults();
+  });
+});
+
 function filterOrders(all, f){
   return all.filter(o=>{
     if(f.company && !(o.company||'').toLowerCase().includes(f.company.toLowerCase())) return false;
@@ -882,6 +1127,11 @@ function filterOrders(all, f){
     if(f.orderNumber && !(o.orderNumber||'').toLowerCase().includes(f.orderNumber.toLowerCase())) return false;
     if(f.itemName && !(o.itemName||'').toLowerCase().includes(f.itemName.toLowerCase())) return false;
     if(f.staff && !(o.staff||'').toLowerCase().includes(f.staff.toLowerCase())) return false;
+    if(f.material && o.material !== f.material) return false;
+    if(f.thickness !== '' && f.thickness != null && Number(o.thickness) !== Number(f.thickness)) return false;
+    if(f.sizeV !== '' && f.sizeV != null && Number(o.sizeV) !== Number(f.sizeV)) return false;
+    if(f.sizeH !== '' && f.sizeH != null && Number(o.sizeH) !== Number(f.sizeH)) return false;
+    if(f.result){ const r = (o.result==='won'||o.result==='lost') ? o.result : 'pending'; if(r !== f.result) return false; }
     return true;
   });
 }
@@ -912,7 +1162,7 @@ function renderSearchResults(){
 
   const el = document.getElementById('searchResults');
   if(sorted.length === 0){
-    el.innerHTML = '<div class="empty-state"><div class="icon">🔍</div>条件に一致する受注データが見つかりませんでした</div>';
+    el.innerHTML = '<div class="empty-state"><div class="icon">🔍</div>条件に一致する見積データが見つかりませんでした</div>';
     return;
   }
   el.innerHTML = sorted.map(o => orderCardHTML(o)).join('');
@@ -920,9 +1170,24 @@ function renderSearchResults(){
 }
 
 /* =========================================================
-   売上分析
+   見積分析
    ========================================================= */
 function monthRangeKey(dt){ return `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}`; }
+
+function computeResultStats(list){
+  let pending=0, won=0, lost=0, totalAmount=0, wonAmount=0, lostAmount=0;
+  list.forEach(o=>{
+    const amt = Number(o.amount)||0;
+    totalAmount += amt;
+    const r = (o.result==='won'||o.result==='lost') ? o.result : 'pending';
+    if(r==='won'){ won++; wonAmount += amt; }
+    else if(r==='lost'){ lost++; lostAmount += amt; }
+    else pending++;
+  });
+  const denom = won + lost;
+  const rate = denom ? (won/denom*100) : null;
+  return { pending, won, lost, totalAmount, wonAmount, lostAmount, rate, count: list.length };
+}
 
 function renderAnalysis(){
   const now = new Date();
@@ -931,45 +1196,118 @@ function renderAnalysis(){
   const lastMonthKey = monthRangeKey(lastMonthDate);
   const thisYear = String(now.getFullYear());
 
-  let thisMonthTotal = 0, lastMonthTotal = 0, thisYearTotal = 0;
+  let thisMonthTotal = 0, thisMonthCount = 0, lastMonthTotal = 0, thisYearTotal = 0;
   ALL_ORDERS.forEach(o=>{
     const ym = ymFromISO(o.orderDate);
     if(!ym) return;
-    if(ym === thisMonthKey) thisMonthTotal += Number(o.amount)||0;
+    if(ym === thisMonthKey){ thisMonthTotal += Number(o.amount)||0; thisMonthCount++; }
     if(ym === lastMonthKey) lastMonthTotal += Number(o.amount)||0;
     if(ym.slice(0,4) === thisYear) thisYearTotal += Number(o.amount)||0;
   });
+  document.getElementById('an_thisMonthCount').innerHTML = `${thisMonthCount.toLocaleString('ja-JP')}<small> 件</small>`;
   document.getElementById('an_thisMonth').innerHTML = `${formatMoney(thisMonthTotal)}<small> 円</small>`;
   document.getElementById('an_lastMonth').innerHTML = `${formatMoney(lastMonthTotal)}<small> 円</small>`;
   document.getElementById('an_thisYear').innerHTML = `${formatMoney(thisYearTotal)}<small> 円</small>`;
 
-  // 会社別ランキング
+  // 見積結果の集計（全期間）
+  const rs = computeResultStats(ALL_ORDERS);
+  document.getElementById('an_pendingCount').textContent = rs.pending.toLocaleString('ja-JP');
+  document.getElementById('an_wonCount').textContent = rs.won.toLocaleString('ja-JP');
+  document.getElementById('an_lostCount').textContent = rs.lost.toLocaleString('ja-JP');
+  document.getElementById('an_winRate').textContent = formatRate(rs.rate);
+  document.getElementById('an_totalAmount').textContent = formatMoney(rs.totalAmount) + '円';
+  document.getElementById('an_wonAmount').textContent = formatMoney(rs.wonAmount) + '円';
+  document.getElementById('an_lostAmount').textContent = formatMoney(rs.lostAmount) + '円';
+
+  // 会社別集計
   const byCompany = {};
   ALL_ORDERS.forEach(o=>{
     const key = o.company || '（会社名未設定）';
-    if(!byCompany[key]) byCompany[key] = { total:0, count:0 };
-    byCompany[key].total += Number(o.amount)||0;
-    byCompany[key].count += 1;
+    if(!byCompany[key]) byCompany[key] = { orders: [] };
+    byCompany[key].orders.push(o);
   });
-  const ranking = Object.entries(byCompany).map(([name, v])=>({name, ...v})).sort((a,b)=> b.total - a.total).slice(0,10);
-  const rankingMax = ranking.length ? ranking[0].total : 0;
-  const rankEl = document.getElementById('rankingList');
-  if(ranking.length === 0){
-    rankEl.innerHTML = '<div class="empty-state"><div class="icon">📊</div>まだ集計できるデータがありません</div>';
+  const companyEntries = Object.entries(byCompany).map(([name, v])=>{
+    const stats = computeResultStats(v.orders);
+    return { name, ...stats };
+  });
+
+  // 件数ランキング
+  const byCount = companyEntries.slice().sort((a,b)=> b.count - a.count).slice(0,10);
+  const countMax = byCount.length ? byCount[0].count : 0;
+  const countEl = document.getElementById('rankingCountList');
+  if(byCount.length === 0){
+    countEl.innerHTML = '<div class="empty-state"><div class="icon">📊</div>まだ集計できるデータがありません</div>';
   }else{
-    rankEl.innerHTML = ranking.map((r,i)=>{
-      const pct = rankingMax ? Math.max(6, Math.round(r.total/rankingMax*100)) : 0;
+    countEl.innerHTML = byCount.map((r,i)=>{
+      const pct = countMax ? Math.max(6, Math.round(r.count/countMax*100)) : 0;
       return `
       <div class="bar-row">
         <div class="bar-rank">${i+1}</div>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${pct}%;"></div>
-          <div class="bar-name">${escHtml(r.name)}</div>
-        </div>
-        <div class="bar-value nums">${formatMoney(r.total)}円<br><span style="color:var(--muted);font-weight:500;">${r.count}件</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;"></div><div class="bar-name">${escHtml(r.name)}</div></div>
+        <div class="bar-value nums">${r.count}件</div>
       </div>`;
     }).join('');
   }
+
+  // 金額ランキング
+  const byAmount = companyEntries.slice().sort((a,b)=> b.totalAmount - a.totalAmount).slice(0,10);
+  const amountMax = byAmount.length ? byAmount[0].totalAmount : 0;
+  const amountEl = document.getElementById('rankingAmountList');
+  if(byAmount.length === 0){
+    amountEl.innerHTML = '<div class="empty-state"><div class="icon">📊</div>まだ集計できるデータがありません</div>';
+  }else{
+    amountEl.innerHTML = byAmount.map((r,i)=>{
+      const pct = amountMax ? Math.max(6, Math.round(r.totalAmount/amountMax*100)) : 0;
+      return `
+      <div class="bar-row">
+        <div class="bar-rank">${i+1}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;"></div><div class="bar-name">${escHtml(r.name)}</div></div>
+        <div class="bar-value nums">${formatMoney(r.totalAmount)}円</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 会社別の受注状況（一覧）
+  const statusList = companyEntries.slice().sort((a,b)=> b.count - a.count);
+  const statusEl = document.getElementById('companyStatusList');
+  if(statusList.length === 0){
+    statusEl.innerHTML = '<div class="empty-state"><div class="icon">🏢</div>まだ集計できるデータがありません</div>';
+  }else{
+    statusEl.innerHTML = statusList.map(r => `
+      <div class="company-status-card">
+        <div class="name">${escHtml(r.name)}</div>
+        <div class="grid">
+          <div class="item"><b>${r.count}</b>見積件数</div>
+          <div class="item" style="color:var(--success);"><b>${r.won}</b>受注</div>
+          <div class="item" style="color:var(--danger);"><b>${r.lost}</b>失注</div>
+          <div class="item" style="color:var(--pending);"><b>${r.pending}</b>回答待ち</div>
+        </div>
+        <div class="rate-line">受注率 ${formatRate(r.rate)}</div>
+      </div>
+    `).join('');
+  }
+
+  // 材質別の集計
+  const materialEl = document.getElementById('materialStatsList');
+  const materialRows = MATERIAL_OPTIONS.map(mat=>{
+    const list = ALL_ORDERS.filter(o => materialCategory(o) === mat);
+    const stats = computeResultStats(list);
+    return { name: mat, ...stats };
+  });
+  const materialMax = Math.max(1, ...materialRows.map(r=> r.count));
+  materialEl.innerHTML = materialRows.map(r=>{
+    const pct = r.count ? Math.max(4, Math.round(r.count/materialMax*100)) : 0;
+    return `
+    <div class="material-row">
+      <div class="m-name">${escHtml(r.name)}</div>
+      <div class="m-stats">
+        <span>見積 <b>${r.count}</b>件</span>
+        <span style="color:var(--success);">受注 <b>${r.won}</b></span>
+        <span style="color:var(--danger);">失注 <b>${r.lost}</b></span>
+        <span>受注率 <b>${formatRate(r.rate)}</b></span>
+      </div>
+    </div>`;
+  }).join('');
 
   // 会社セレクト
   const sel = document.getElementById('an_companySelect');
@@ -978,42 +1316,87 @@ function renderAnalysis(){
   sel.innerHTML = '<option value="">すべての会社（合計）</option>' + companies.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
   if(companies.includes(prevValue)) sel.value = prevValue;
 
-  renderMonthlyTrend(sel.value);
+  renderCompanyDetail(sel.value);
 }
 
 document.getElementById('an_companySelect').addEventListener('change', (e)=>{
   state.analysisCompany = e.target.value;
-  renderMonthlyTrend(e.target.value);
+  renderCompanyDetail(e.target.value);
 });
 
-function renderMonthlyTrend(companyFilter){
+function renderCompanyDetail(companyFilter){
   const target = companyFilter ? ALL_ORDERS.filter(o=> o.company === companyFilter) : ALL_ORDERS;
-  const byMonth = {};
+  const stats = computeResultStats(target);
+  const detailEl = document.getElementById('companyDetail');
+
+  // 材質別件数（選択中の対象内）
+  const matCounts = MATERIAL_OPTIONS.map(mat => ({
+    name: mat, count: target.filter(o=> materialCategory(o) === mat).length
+  })).filter(m => m.count > 0);
+
+  detailEl.innerHTML = `
+    <div class="result-stat-grid" style="margin-bottom:10px;">
+      <div class="result-stat"><div class="n nums">${stats.count}</div><div class="l">見積件数</div></div>
+      <div class="result-stat won"><div class="n nums">${stats.won}</div><div class="l">受注</div></div>
+      <div class="result-stat lost"><div class="n nums">${stats.lost}</div><div class="l">失注</div></div>
+      <div class="result-stat rate"><div class="n nums">${formatRate(stats.rate)}</div><div class="l">受注率</div></div>
+    </div>
+    <div class="amount-breakdown" style="margin-bottom:12px;">
+      <div class="box"><div class="v nums">${formatMoney(stats.totalAmount)}円</div><div class="l">見積金額合計</div></div>
+      <div class="box"><div class="v nums">${formatMoney(stats.wonAmount)}円</div><div class="l">受注金額合計</div></div>
+      <div class="box"><div class="v nums">${formatMoney(stats.lostAmount)}円</div><div class="l">失注金額合計</div></div>
+    </div>
+    ${matCounts.length ? `<div class="m-stats" style="font-size:12.5px;">${matCounts.map(m=>`<span style="margin-right:12px;">${escHtml(m.name)} <b>${m.count}</b>件</span>`).join('')}</div>` : ''}
+  `;
+
+  renderMonthlyTrends(target);
+}
+
+function renderMonthlyTrends(target){
+  const byMonthAmount = {};
+  const byMonthCount = {};
   target.forEach(o=>{
     const ym = ymFromISO(o.orderDate);
     if(!ym) return;
-    byMonth[ym] = (byMonth[ym]||0) + (Number(o.amount)||0);
+    byMonthAmount[ym] = (byMonthAmount[ym]||0) + (Number(o.amount)||0);
+    byMonthCount[ym] = (byMonthCount[ym]||0) + 1;
   });
 
-  // 直近12ヶ月分の枠を用意し、データがあればそれ以前も表示
   const now = new Date();
   const months = [];
   for(let i=11;i>=0;i--){
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
     months.push(monthRangeKey(d));
   }
-  const extraMonths = Object.keys(byMonth).filter(m => !months.includes(m)).sort();
+  const extraMonths = Object.keys(byMonthAmount).filter(m => !months.includes(m)).sort();
   const allMonths = extraMonths.concat(months).sort();
-  const max = Math.max(1, ...allMonths.map(m=> byMonth[m]||0));
 
-  const el = document.getElementById('monthlyTrend');
-  if(allMonths.every(m => !byMonth[m])){
-    el.innerHTML = '<div class="empty-state"><div class="icon">📈</div>表示できるデータがありません</div>';
+  const countEl = document.getElementById('monthlyCountTrend');
+  const amountEl = document.getElementById('monthlyTrend');
+
+  if(allMonths.every(m => !byMonthAmount[m] && !byMonthCount[m])){
+    countEl.innerHTML = '<div class="empty-state"><div class="icon">📈</div>表示できるデータがありません</div>';
+    amountEl.innerHTML = '';
     return;
   }
-  el.innerHTML = allMonths.map(m=>{
-    const val = byMonth[m] || 0;
-    const pct = max ? Math.max(val ? 4 : 0, Math.round(val/max*100)) : 0;
+
+  const countMax = Math.max(1, ...allMonths.map(m=> byMonthCount[m]||0));
+  countEl.innerHTML = allMonths.map(m=>{
+    const val = byMonthCount[m] || 0;
+    const pct = countMax ? Math.max(val ? 4 : 0, Math.round(val/countMax*100)) : 0;
+    const [y,mm] = m.split('-');
+    return `
+    <div class="month-bar-row">
+      <div class="month-label">${y}/${mm}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;"></div></div>
+      <div class="bar-value nums">${val}件</div>
+    </div>`;
+  }).join('');
+
+  const amountMax = Math.max(1, ...allMonths.map(m=> byMonthAmount[m]||0));
+  amountEl.innerHTML = allMonths.map(m=>{
+    const val = byMonthAmount[m] || 0;
+    const pct = amountMax ? Math.max(val ? 4 : 0, Math.round(val/amountMax*100)) : 0;
     const [y,mm] = m.split('-');
     return `
     <div class="month-bar-row">
@@ -1034,7 +1417,7 @@ function renderSettings(){
 /* =========================================================
    CSV 出力
    ========================================================= */
-const CSV_HEADERS = ['受注日','会社名','受注番号','品名','受注金額','数量','納期','担当者','備考'];
+const CSV_HEADERS = ['見積日','会社名','見積番号','品名','材質','板厚','縦サイズ','横サイズ','数量','見積金額','見積結果','担当者','納期','備考'];
 function csvEscape(v){
   const s = String(v == null ? '' : v);
   if(/[",\n\r]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
@@ -1047,9 +1430,12 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   }
   const rows = [CSV_HEADERS.join(',')];
   ALL_ORDERS.forEach(o=>{
+    const result = (o.result==='won'||o.result==='lost') ? o.result : 'pending';
     rows.push([
       o.orderDate||'', o.company||'', o.orderNumber||'', o.itemName||'',
-      o.amount!=null?o.amount:'', o.quantity!=null?o.quantity:'', o.dueDate||'', o.staff||'', o.note||''
+      materialDisplay(o), o.thickness!=null?o.thickness:'', o.sizeV!=null?o.sizeV:'', o.sizeH!=null?o.sizeH:'',
+      o.quantity!=null?o.quantity:'', o.amount!=null?o.amount:'', RESULT_LABELS[result],
+      o.staff||'', o.dueDate||'', o.note||''
     ].map(csvEscape).join(','));
   });
   const csv = '\uFEFF' + rows.join('\r\n');
@@ -1057,7 +1443,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   const stamp = todayISO().replace(/-/g,'');
-  a.href = url; a.download = `受注データ_${stamp}.csv`;
+  a.href = url; a.download = `見積データ_${stamp}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('CSVを出力しました', 'success');
@@ -1088,9 +1474,13 @@ function parseCSV(text){
 }
 
 const HEADER_ALIASES = {
-  '受注日':'orderDate', '会社名':'company', '受注番号':'orderNumber', '品名':'itemName',
-  '受注金額':'amount', '数量':'quantity', '納期':'dueDate', '担当者':'staff', '備考':'note'
+  '見積日':'orderDate', '受注日':'orderDate', '会社名':'company',
+  '見積番号':'orderNumber', '受注番号':'orderNumber', '品名':'itemName',
+  '材質':'material', '板厚':'thickness', '縦サイズ':'sizeV', '横サイズ':'sizeH',
+  '見積金額':'amount', '受注金額':'amount', '数量':'quantity',
+  '見積結果':'result', '納期':'dueDate', '担当者':'staff', '備考':'note'
 };
+const RESULT_LABEL_TO_VALUE = { '回答待ち':'pending', '受注':'won', '失注':'lost', 'pending':'pending', 'won':'won', 'lost':'lost' };
 
 document.getElementById('importCsvInput').addEventListener('change', (e)=>{
   const file = e.target.files[0];
@@ -1105,7 +1495,7 @@ document.getElementById('importCsvInput').addEventListener('change', (e)=>{
       const colIndex = {};
       header.forEach((h,i)=>{
         const key = HEADER_ALIASES[h];
-        if(key) colIndex[key] = i;
+        if(key && colIndex[key] == null) colIndex[key] = i;
       });
       let imported = 0, skipped = 0;
       const newOrders = [];
@@ -1119,18 +1509,32 @@ document.getElementById('importCsvInput').addEventListener('change', (e)=>{
         const orderDate = get('orderDate', 0);
         const company = get('company', 1);
         if(!orderDate || !company){ skipped++; continue; }
-        const amountStr = get('amount', 4);
+        const amountStr = get('amount', 9);
+        const materialRaw = get('material', 4);
+        const material = MATERIAL_OPTIONS.includes(materialRaw) ? materialRaw : (materialRaw ? 'その他' : '');
+        const materialOther = (material === 'その他' && materialRaw !== 'その他') ? materialRaw : '';
+        const resultRaw = get('result', 10);
+        const result = RESULT_LABEL_TO_VALUE[resultRaw] || 'pending';
+        const thicknessStr = get('thickness', 5);
+        const sizeVStr = get('sizeV', 6);
+        const sizeHStr = get('sizeH', 7);
         newOrders.push({
           id: uid(),
           orderDate,
           company,
           orderNumber: get('orderNumber', 2),
           itemName: get('itemName', 3),
-          amount: Math.round(Number(amountStr.replace(/[^0-9.-]/g,'')) || 0),
-          quantity: (() => { const q = get('quantity', 5); return q === '' ? '' : Math.round(Number(q))||0; })(),
-          dueDate: get('dueDate', 6),
-          staff: get('staff', 7),
-          note: get('note', 8),
+          material,
+          materialOther,
+          thickness: thicknessStr === '' ? '' : Number(thicknessStr.replace(/[^0-9.\-]/g,'')) || '',
+          sizeV: sizeVStr === '' ? '' : Number(sizeVStr.replace(/[^0-9.\-]/g,'')) || '',
+          sizeH: sizeHStr === '' ? '' : Number(sizeHStr.replace(/[^0-9.\-]/g,'')) || '',
+          amount: Math.round(Number(amountStr.replace(/[^0-9.\-]/g,'')) || 0),
+          quantity: (() => { const q = get('quantity', 8); return q === '' ? '' : Math.round(Number(q))||0; })(),
+          result,
+          dueDate: get('dueDate', 11),
+          staff: get('staff', 12),
+          note: get('note', 13),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         });
@@ -1186,13 +1590,11 @@ async function reloadOrders(){
 async function init(){
   await reloadOrders();
   document.getElementById('f_orderDate').value = todayISO();
+  document.getElementById('f_result').value = 'pending';
+  syncMaterialOtherVisibility();
   renderRecentList();
   renderSettings();
   gotoScreen('register');
-
-  if('serviceWorker' in navigator && location.protocol !== 'file:'){
-    // 将来的なオフライン対応の余地を残す（現状は未登録）
-  }
 }
 init();
 </script>

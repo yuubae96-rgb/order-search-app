@@ -1,7 +1,7 @@
 {
-  "name": "受注検索・売上集計アプリ",
-  "short_name": "受注管理",
-  "description": "得意先ごとの受注登録・検索・売上集計を行う業務アプリ",
+  "name": "見積もり検索・見積分析アプリ",
+  "short_name": "見積管理",
+  "description": "得意先ごとの見積もり登録・検索・分析を行う業務アプリ",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
