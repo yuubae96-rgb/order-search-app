@@ -301,7 +301,38 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const formCardTitle = document.getElementById('formCardTitle');
 const materialSelect = document.getElementById('f_material');
 const materialOtherField = document.getElementById('materialOtherField');
+const drawingInput = document.getElementById('f_drawing');
+const drawingStatus = document.getElementById('drawingStatus');
+const DRAWING_BUCKET = 'drawings';
 
+async function uploadDrawing(file){
+  if(!file) return null;
+
+  drawingStatus.textContent = 'アップロード中...';
+
+  const safeName = file.name.replace(/[^\w.\-ぁ-んァ-ヶ一-龠]/g, '_');
+  const path = `${Date.now()}_${safeName}`;
+
+  const { error } = await supabaseClient.storage
+    .from(DRAWING_BUCKET)
+    .upload(path, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if(error){
+    console.error(error);
+    drawingStatus.textContent = 'アップロード失敗';
+    throw error;
+  }
+
+  drawingStatus.textContent = `添付：${file.name}`;
+
+  return {
+    path: path,
+    name: file.name
+  };
+}
 function syncMaterialOtherVisibility(){
   materialOtherField.style.display = materialSelect.value === 'その他' ? '' : 'none';
 }
