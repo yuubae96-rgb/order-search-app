@@ -12,6 +12,7 @@ function normalizeOrder(o){
   return Object.assign({
     material: '', materialOther: '', thickness: '', sizeV: '', sizeH: '',
     dueDate: '', staff: '', itemName: '', quantity: '', note: '', orderNumber: '',
+    drawingPath: '', drawingName: '',
     createdBy: '', updatedBy: '', createdAt: '', updatedAt: ''
   }, o, {
     result: (o.result === 'won' || o.result === 'lost') ? o.result : 'pending'
@@ -40,7 +41,9 @@ function orderToDb(o){
     status: RESULT_TO_DB[o.result] || '回答待ち',
     person_in_charge: o.staff || null,
     delivery_date: o.dueDate || null,
-    memo: o.note || null
+memo: o.note || null,
+drawing_path: o.drawingPath || null,
+drawing_name: o.drawingName || null
   };
 }
 
@@ -62,9 +65,11 @@ function dbToOrder(row){
     quantity: row.quantity == null ? '' : Number(row.quantity),
     result: DB_TO_RESULT[row.status] || 'pending',
     staff: row.person_in_charge || '',
-    dueDate: row.delivery_date || '',
-    note: row.memo || '',
-    createdBy: row.created_by || '',
+dueDate: row.delivery_date || '',
+note: row.memo || '',
+drawingPath: row.drawing_path || '',
+drawingName: row.drawing_name || '',
+createdBy: row.created_by || '',
     updatedBy: row.updated_by || '',
     createdAt: row.created_at || '',
     updatedAt: row.updated_at || row.created_at || ''
@@ -338,6 +343,7 @@ function syncMaterialOtherVisibility(){
 }
 materialSelect.addEventListener('change', syncMaterialOtherVisibility);
 
+drawingStatus.textContent = '';
 function resetForm(){
   form.reset();
   document.getElementById('f_orderDate').value = todayISO();
@@ -366,6 +372,9 @@ function fillFormForEdit(order){
   document.getElementById('f_amount').value = order.amount != null ? order.amount : '';
   document.getElementById('f_quantity').value = order.quantity != null ? order.quantity : '';
   document.getElementById('f_note').value = order.note || '';
+   drawingStatus.textContent = order.drawingName
+  ? `現在の添付：${order.drawingName}`
+  : '添付ファイルなし';
   syncMaterialOtherVisibility();
   state.editingId = order.id;
   state.editingVersion = order.updatedAt || order.createdAt || null;
@@ -411,6 +420,21 @@ form.addEventListener('submit', async (e)=>{
 
   submitBtn.disabled = true;
   try{
+         const file = drawingInput.files[0];
+
+    if(file){
+      const drawing = await uploadDrawing(file);
+      payload.drawingPath = drawing.path;
+      payload.drawingName = drawing.name;
+    }else if(state.editingId){
+      const currentOrder = ALL_ORDERS.find(o => o.id === state.editingId);
+      payload.drawingPath = currentOrder ? currentOrder.drawingPath : '';
+      payload.drawingName = currentOrder ? currentOrder.drawingName : '';
+    }else{
+      payload.drawingPath = '';
+      payload.drawingName = '';
+    }
+     
     if(state.editingId){
       const editingId = state.editingId;
       const result = await StorageAPI.update(editingId, payload, state.editingVersion);
@@ -508,7 +532,8 @@ function orderCardHTML(o){
       ${o.updatedBy ? `<span>最終変更 ${escHtml(o.updatedBy)}</span>` : ''}
       ${o.updatedAt ? `<span>${escHtml(formatDateTime(o.updatedAt))}</span>` : ''}
     </div>` : ''}
-    <div class="actions">
+        <div class="actions">
+      ${o.drawingPath ? `<button class="btn btn-secondary btn-sm" data-action="drawing">📎 ${escHtml(o.drawingName || '図面を見る')}</button>` : ''}
       <button class="btn btn-ghost btn-sm" data-action="edit">編集</button>
       <button class="btn btn-ghost btn-sm" data-action="delete" style="color:var(--danger);border-color:var(--danger-bg);">削除</button>
     </div>
@@ -519,6 +544,29 @@ function bindOrderCardActions(container){
   container.querySelectorAll('.order-card').forEach(card=>{
     const id = card.dataset.id;
     const editBtn = card.querySelector('[data-action="edit"]');
+     const drawingBtn = card.querySelector('[data-action="drawing"]');
+         if(drawingBtn) drawingBtn.addEventListener('click', async ()=>{
+      const order = ALL_ORDERS.find(o => o.id === id);
+      if(!order || !order.drawingPath) return;
+
+      drawingBtn.disabled = true;
+      drawingBtn.textContent = '開いています...';
+
+      try{
+        const { data, error } = await supabaseClient.storage
+          .from(DRAWING_BUCKET)
+          .createSignedUrl(order.drawingPath, 60);
+
+        if(error) throw error;
+
+        window.location.href = data.signedUrl;
+      }catch(err){
+        console.error(err);
+        showToast('添付ファイルを開けませんでした', 'danger');
+        drawingBtn.disabled = false;
+        drawingBtn.textContent = `📎 ${order.drawingName || '図面を見る'}`;
+      }
+    });
     const delBtn = card.querySelector('[data-action="delete"]');
     if(editBtn) editBtn.addEventListener('click', ()=>{
       const order = ALL_ORDERS.find(o=>o.id===id);
