@@ -298,9 +298,55 @@ main{max-width:720px;margin:0 auto;padding:16px 16px calc(96px + var(--safe-bott
 input[type=file]{display:none;}
 
 select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%236b7480' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
+
+/* ---------- Cloud login ---------- */
+.auth-gate{
+  position:fixed;inset:0;z-index:1000;background:rgba(20,22,25,.72);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px calc(18px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(18px + var(--safe-left));
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+}
+.auth-gate.hidden{display:none;}
+.auth-card{
+  width:min(100%,430px);background:#fff;border-radius:16px;padding:22px 18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);border:1px solid var(--steel-200);
+}
+.auth-mark{
+  width:48px;height:48px;border-radius:9px;margin:0 auto 12px;
+  background:linear-gradient(155deg,var(--brass-300),var(--brass-600) 70%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:22px;font-weight:900;color:#3a2a10;
+}
+.auth-title{text-align:center;font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:4px;}
+.auth-sub{text-align:center;color:var(--muted);font-size:12.5px;line-height:1.6;margin-bottom:18px;}
+.auth-error{display:none;color:var(--danger);background:var(--danger-bg);border-radius:8px;padding:9px 10px;font-size:12.5px;margin-bottom:12px;}
+.auth-error.show{display:block;}
+.cloud-status{font-size:12px;color:var(--muted);margin-top:4px;word-break:break-all;}
+
 </style>
 </head>
 <body>
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <div class="auth-mark">見</div>
+    <div class="auth-title">見積管理にログイン</div>
+    <div class="auth-sub">会社の見積データをクラウドから読み込みます</div>
+    <div class="auth-error" id="authError"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label>メールアドレス</label>
+        <input type="email" id="loginEmail" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>パスワード</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="loginBtn">ログイン</button>
+    </form>
+  </div>
+</div>
+
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -593,6 +639,23 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   <!-- ============ 設定 ============ -->
   <section class="screen" id="screen-settings" data-screen="settings">
     <div class="card">
+      <div class="card-title">クラウド接続</div>
+      <div class="settings-row">
+        <div>
+          <div class="t">ログイン中</div>
+          <div class="d" id="cloudUserEmail">確認中...</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn">ログアウト</button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="t">旧端末データを移行</div>
+          <div class="d">この端末に残っている旧localStorageデータをSupabaseへコピーします</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="migrateLocalBtn">移行</button>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-title">データのバックアップ</div>
       <div class="settings-row">
         <div>
@@ -618,7 +681,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
       <div class="settings-row">
         <div>
           <div class="t">登録件数</div>
-          <div class="d">現在この端末に保存されている見積データ</div>
+          <div class="d">現在クラウドに保存されている見積データ</div>
         </div>
         <div class="nums" style="font-weight:700;" id="settingsCount">0 件</div>
       </div>
@@ -634,8 +697,8 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
     <div class="card">
       <div class="card-title">保存場所について</div>
       <div class="info-box">
-        現在、見積データはこの端末のブラウザ内（localStorage）に保存されています。他の端末とは共有されません。<br><br>
-        将来的にクラウドデータベースへ切り替えることで、事務所のパソコンで登録した見積もりを社長のiPhoneからも検索できるようになる予定です。データの読み書きは内部的に共通の関数（保存機能）を通して行っているため、クラウド化の際もアプリの操作方法は変わりません。
+        見積データはSupabaseのクラウドデータベースに保存されます。<br><br>
+        同じログイン情報を使えば、会社のパソコンとiPhoneから同じ見積データを登録・検索・編集できます。CSV出力はバックアップとして引き続き利用できます。
       </div>
     </div>
   </section>
@@ -695,6 +758,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
 
@@ -715,50 +779,141 @@ function normalizeOrder(o){
   });
 }
 
+const SUPABASE_URL = 'https://vnnvuxccazkdzwqjmntz.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_xG-tuBgxFGntT1vlbZzuVQ_AZ2Zl8QL';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const RESULT_TO_DB = { pending:'回答待ち', won:'受注', lost:'失注' };
+const DB_TO_RESULT = { '回答待ち':'pending', '受注':'won', '失注':'lost' };
+
+function orderToDb(o){
+  const materialValue = o.material === 'その他'
+    ? (o.materialOther || 'その他')
+    : (o.material || null);
+  return {
+    estimate_date: o.orderDate || null,
+    company_name: o.company || '',
+    estimate_number: o.orderNumber || null,
+    product_name: o.itemName || null,
+    amount: Number(o.amount) || 0,
+    material: materialValue,
+    thickness: (o.thickness === '' || o.thickness == null) ? null : String(o.thickness),
+    width: (o.sizeH === '' || o.sizeH == null) ? null : Number(o.sizeH),
+    height: (o.sizeV === '' || o.sizeV == null) ? null : Number(o.sizeV),
+    quantity: (o.quantity === '' || o.quantity == null) ? null : Number(o.quantity),
+    status: RESULT_TO_DB[o.result] || '回答待ち',
+    person_in_charge: o.staff || null,
+    delivery_date: o.dueDate || null,
+    memo: o.note || null
+  };
+}
+
+function dbToOrder(row){
+  const rawMaterial = row.material || '';
+  const knownMaterial = MATERIAL_OPTIONS.includes(rawMaterial);
+  return normalizeOrder({
+    id: String(row.id),
+    orderDate: row.estimate_date || '',
+    company: row.company_name || '',
+    orderNumber: row.estimate_number || '',
+    itemName: row.product_name || '',
+    amount: row.amount == null ? 0 : Number(row.amount),
+    material: knownMaterial ? rawMaterial : (rawMaterial ? 'その他' : ''),
+    materialOther: (!knownMaterial && rawMaterial) ? rawMaterial : '',
+    thickness: row.thickness == null ? '' : Number(row.thickness),
+    sizeV: row.height == null ? '' : Number(row.height),
+    sizeH: row.width == null ? '' : Number(row.width),
+    quantity: row.quantity == null ? '' : Number(row.quantity),
+    result: DB_TO_RESULT[row.status] || 'pending',
+    staff: row.person_in_charge || '',
+    dueDate: row.delivery_date || '',
+    note: row.memo || '',
+    createdAt: row.created_at || '',
+    updatedAt: row.created_at || ''
+  });
+}
+
+function cloudError(error){
+  console.error(error);
+  if(error && (error.code === 'PGRST301' || error.status === 401 || error.status === 403)){
+    showAuthGate('ログインの有効期限が切れました。もう一度ログインしてください。');
+  }
+  throw error;
+}
+
 const StorageAPI = {
-  KEY: 'hotmilk_orders_v1',
+  LEGACY_KEY: 'hotmilk_orders_v1',
+
   async getAll(){
+    const { data, error } = await supabaseClient
+      .from('estimates')
+      .select('*')
+      .order('created_at', { ascending:false });
+    if(error) return cloudError(error);
+    return (data || []).map(dbToOrder);
+  },
+
+  async add(order){
+    const payload = orderToDb(order);
+    const { data, error } = await supabaseClient
+      .from('estimates')
+      .insert(payload)
+      .select()
+      .single();
+    if(error) return cloudError(error);
+    return dbToOrder(data);
+  },
+
+  async addMany(orders){
+    if(!orders.length) return 0;
+    const payload = orders.map(orderToDb);
+    const { data, error } = await supabaseClient
+      .from('estimates')
+      .insert(payload)
+      .select('id');
+    if(error) return cloudError(error);
+    return (data || []).length;
+  },
+
+  async update(id, patch){
+    const payload = orderToDb(patch);
+    const { data, error } = await supabaseClient
+      .from('estimates')
+      .update(payload)
+      .eq('id', Number(id))
+      .select()
+      .single();
+    if(error) return cloudError(error);
+    return dbToOrder(data);
+  },
+
+  async remove(id){
+    const { error } = await supabaseClient
+      .from('estimates')
+      .delete()
+      .eq('id', Number(id));
+    if(error) return cloudError(error);
+    return true;
+  },
+
+  async removeAll(){
+    const { error } = await supabaseClient
+      .from('estimates')
+      .delete()
+      .gte('id', 0);
+    if(error) return cloudError(error);
+    return true;
+  },
+
+  getLegacyLocal(){
     try{
-      const raw = localStorage.getItem(this.KEY);
+      const raw = localStorage.getItem(this.LEGACY_KEY);
       const list = raw ? JSON.parse(raw) : [];
       return Array.isArray(list) ? list.map(normalizeOrder) : [];
-    }catch(e){ console.error(e); return []; }
-  },
-  async saveAll(list){
-    localStorage.setItem(this.KEY, JSON.stringify(list));
-    return true;
-  },
-  async add(order){
-    const all = await this.getAll();
-    all.push(order);
-    await this.saveAll(all);
-    return order;
-  },
-  async addMany(orders){
-    const all = await this.getAll();
-    const next = all.concat(orders);
-    await this.saveAll(next);
-    return orders.length;
-  },
-  async update(id, patch){
-    const all = await this.getAll();
-    const idx = all.findIndex(o => o.id === id);
-    if(idx >= 0){
-      all[idx] = Object.assign({}, all[idx], patch, {updatedAt: new Date().toISOString()});
-      await this.saveAll(all);
-      return all[idx];
+    }catch(e){
+      console.error(e);
+      return [];
     }
-    return null;
-  },
-  async remove(id){
-    const all = await this.getAll();
-    const next = all.filter(o => o.id !== id);
-    await this.saveAll(next);
-    return true;
-  },
-  async removeAll(){
-    await this.saveAll([]);
-    return true;
   }
 };
 
@@ -933,9 +1088,6 @@ form.addEventListener('submit', async (e)=>{
     await StorageAPI.update(state.editingId, payload);
     showToast('見積データを更新しました', 'success');
   }else{
-    payload.id = uid();
-    payload.createdAt = new Date().toISOString();
-    payload.updatedAt = payload.createdAt;
     await StorageAPI.add(payload);
     showToast('見積もりを登録しました', 'success');
   }
@@ -1580,6 +1732,100 @@ deleteConfirmBtn.addEventListener('click', async ()=>{
   renderRecentList(); renderSearchResults(); renderSettings();
 });
 
+
+/* =========================================================
+   Supabase 認証・旧データ移行
+   ========================================================= */
+const authGate = document.getElementById('authGate');
+const authError = document.getElementById('authError');
+const loginForm = document.getElementById('loginForm');
+const loginBtn = document.getElementById('loginBtn');
+
+function showAuthGate(message=''){
+  authGate.classList.remove('hidden');
+  authError.textContent = message;
+  authError.classList.toggle('show', !!message);
+}
+
+function hideAuthGate(){
+  authGate.classList.add('hidden');
+  authError.classList.remove('show');
+}
+
+async function updateCloudUserLabel(){
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+  const el = document.getElementById('cloudUserEmail');
+  if(el) el.textContent = user && user.email ? user.email : '未ログイン';
+}
+
+loginForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  authError.classList.remove('show');
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'ログイン中...';
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  loginBtn.disabled = false;
+  loginBtn.textContent = 'ログイン';
+  if(error){
+    authError.textContent = 'メールアドレスまたはパスワードを確認してください。';
+    authError.classList.add('show');
+    return;
+  }
+  document.getElementById('loginPassword').value = '';
+  hideAuthGate();
+  await reloadOrders();
+  await updateCloudUserLabel();
+  renderRecentList();
+  renderSearchResults();
+  renderSettings();
+  gotoScreen('register');
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await supabaseClient.auth.signOut();
+  ALL_ORDERS = [];
+  renderRecentList();
+  renderSearchResults();
+  renderSettings();
+  showAuthGate();
+});
+
+document.getElementById('migrateLocalBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('migrateLocalBtn');
+  const legacy = StorageAPI.getLegacyLocal();
+  if(!legacy.length){
+    showToast('この端末に移行できる旧データはありません', 'danger');
+    return;
+  }
+  const marker = localStorage.getItem('hotmilk_orders_cloud_migrated_v1');
+  if(marker){
+    showToast('この端末の旧データは移行済みです', 'danger');
+    return;
+  }
+  if(!confirm(`${legacy.length}件の旧データをクラウドへコピーします。よろしいですか？`)) return;
+  btn.disabled = true;
+  btn.textContent = '移行中...';
+  try{
+    const n = await StorageAPI.addMany(legacy);
+    localStorage.setItem('hotmilk_orders_cloud_migrated_v1', new Date().toISOString());
+    await reloadOrders();
+    renderRecentList(); renderSearchResults(); renderSettings();
+    showToast(`${n}件をクラウドへ移行しました`, 'success');
+  }catch(e){
+    showToast('旧データの移行に失敗しました', 'danger');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '移行';
+  }
+});
+
+supabaseClient.auth.onAuthStateChange((_event, session)=>{
+  if(!session) showAuthGate();
+  updateCloudUserLabel();
+});
+
 /* =========================================================
    初期化
    ========================================================= */
@@ -1588,13 +1834,28 @@ async function reloadOrders(){
 }
 
 async function init(){
-  await reloadOrders();
   document.getElementById('f_orderDate').value = todayISO();
   document.getElementById('f_result').value = 'pending';
   syncMaterialOtherVisibility();
-  renderRecentList();
-  renderSettings();
-  gotoScreen('register');
+
+  const { data:{ session } } = await supabaseClient.auth.getSession();
+  if(!session){
+    showAuthGate();
+    renderRecentList();
+    renderSettings();
+    return;
+  }
+
+  hideAuthGate();
+  try{
+    await reloadOrders();
+    await updateCloudUserLabel();
+    renderRecentList();
+    renderSettings();
+    gotoScreen('register');
+  }catch(e){
+    showAuthGate('クラウドへの接続に失敗しました。再ログインしてください。');
+  }
 }
 init();
 </script>
