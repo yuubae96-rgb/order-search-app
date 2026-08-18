@@ -8,7 +8,12 @@ const supabaseClient = window.supabase.createClient(
 );
 window.supabaseClient = supabaseClient;
 
-const nameplateIntegrationScript = document.createElement('script');
-nameplateIntegrationScript.src = 'nameplate-integration.js?v=20260819-0025';
-nameplateIntegrationScript.async = false;
-document.head.appendChild(nameplateIntegrationScript);
+function loadCompanyModule(src){
+  const s=document.createElement('script');
+  s.src=src;
+  s.async=false;
+  document.head.appendChild(s);
+}
+
+loadCompanyModule('nameplate-integration.js?v=20260819-0025');
+loadCompanyModule('cost-master.js?v=20260819-0035');
