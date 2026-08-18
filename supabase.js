@@ -17,3 +17,4 @@ function loadCompanyModule(src){
 
 loadCompanyModule('nameplate-integration.js?v=20260819-0025');
 loadCompanyModule('cost-master.js?v=20260819-0035');
+loadCompanyModule('workforce-cost.js?v=20260819-0040');
