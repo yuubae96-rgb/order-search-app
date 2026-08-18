@@ -7,13 +7,3 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_PUBLISHABLE_KEY
 );
 window.supabaseClient = supabaseClient;
-
-function loadAppModule(src){
-  const s = document.createElement('script');
-  s.src = src;
-  s.async = false;
-  document.head.appendChild(s);
-}
-
-loadAppModule('materials-inline.js?v=20260818-2359');
-loadAppModule('quote-material-link.js?v=20260818-2359');
