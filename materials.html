@@ -7,7 +7,7 @@
 <title>材料・在庫管理</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.material-wrap{max-width:920px;margin:0 auto;padding:18px 14px 90px}.material-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.material-head h1{font-size:22px;margin:0}.material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.material-actions{display:flex;gap:8px;flex-wrap:wrap}.material-list-item{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)}.material-list-item:last-child{border-bottom:0}.material-top{display:flex;justify-content:space-between;gap:10px}.material-name{font-weight:900;font-size:16px}.material-meta{font-size:12px;opacity:.7;line-height:1.6;margin-top:4px}.material-stock{font-weight:900;font-size:19px;white-space:nowrap}.material-alert{color:#ff8b8b}.material-price{font-weight:800;margin-top:5px}.material-note{font-size:12px;opacity:.7}.material-tabs{display:flex;gap:7px;overflow:auto;padding-bottom:4px;margin-bottom:12px}.material-tab{white-space:nowrap;border:1px solid rgba(255,255,255,.14);background:#262b31;color:#fff;border-radius:999px;padding:9px 13px;font-weight:700}.material-tab.active{background:#fff;color:#16191d}.material-panel{display:none}.material-panel.active{display:block}.mini-badge{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 7px;background:#383f47}.mini-badge.alert{background:#6b2525;color:#ffd4d4}.history-row{display:grid;grid-template-columns:90px 65px 1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}.summary-materials{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}.summary-materials .card{padding:14px}.summary-materials .n{font-size:24px;font-weight:900}.summary-materials .l{font-size:11px;opacity:.65}.auth-inline{padding:24px;text-align:center}.backlink{color:#fff;text-decoration:none;font-weight:700}.preset-note{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.06);font-size:12px;line-height:1.65;margin-bottom:12px}.hidden{display:none!important}
+.material-wrap{max-width:920px;margin:0 auto;padding:18px 14px 90px}.material-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.material-head h1{font-size:22px;margin:0}.material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.material-actions{display:flex;gap:8px;flex-wrap:wrap}.material-list-item{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)}.material-top{display:flex;justify-content:space-between;gap:10px}.material-name{font-weight:900;font-size:16px}.material-meta{font-size:12px;opacity:.7;line-height:1.6;margin-top:4px}.material-stock{font-weight:900;font-size:19px;white-space:nowrap}.material-alert{color:#ff8b8b}.material-price{font-weight:800;margin-top:5px}.material-note{font-size:12px;opacity:.7}.material-tabs{display:flex;gap:7px;overflow:auto;padding-bottom:4px;margin-bottom:12px}.material-tab{white-space:nowrap;border:1px solid rgba(255,255,255,.14);background:#262b31;color:#fff;border-radius:999px;padding:9px 13px;font-weight:700}.material-tab.active{background:#fff;color:#16191d}.material-panel{display:none}.material-panel.active{display:block}.mini-badge{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 7px;background:#383f47}.mini-badge.alert{background:#6b2525;color:#ffd4d4}.history-row{display:grid;grid-template-columns:90px 65px 1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}.summary-materials{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}.summary-materials .card{padding:14px}.summary-materials .n{font-size:24px;font-weight:900}.summary-materials .l{font-size:11px;opacity:.65}.auth-inline{padding:24px;text-align:center}.backlink{color:#fff;text-decoration:none;font-weight:700}.auto-note{font-size:12px;opacity:.7;margin-top:-5px}.optional-custom{display:none}.optional-custom.show{display:block}.section-title{font-weight:800;margin:18px 0 8px}.field select{font-size:16px}
 @media(max-width:700px){.material-grid{grid-template-columns:1fr}.summary-materials{grid-template-columns:1fr 1fr}.summary-materials .card:last-child{grid-column:1/-1}.history-row{grid-template-columns:78px 55px 1fr}.history-row .hr-qty{grid-column:3}}
 </style>
 </head>
@@ -33,34 +33,39 @@
     </section>
 
     <section class="material-panel" id="mp-master">
-      <div class="card"><div class="card-title">材料マスター登録</div>
-        <div class="preset-note">基本は選ぶだけです。特殊材料だけ「その他」を選ぶと自由入力できます。</div>
+      <div class="card">
+        <div class="card-title">材料マスター登録</div>
+        <div class="auto-note">基本は選ぶだけ。特殊品だけ「その他」を選ぶと自由入力できます。</div>
+
+        <div class="section-title">① 材料を選ぶ</div>
         <div class="material-grid">
-          <div class="field"><label>分類</label><select id="mm_category">
-            <option value="金属板">金属板</option><option value="樹脂板">樹脂板</option><option value="シール・ラベル">シール・ラベル</option><option value="ラミネート">ラミネート</option><option value="インキ・溶剤">インキ・溶剤</option><option value="その他">その他</option>
-          </select></div>
-          <div class="field"><label>材料名 必須</label><select id="mm_name"></select></div>
-          <div class="field hidden" id="mm_name_other_wrap"><label>材料名（自由入力）</label><input id="mm_name_other"></div>
+          <div class="field"><label>大分類</label><select id="mm_category"></select></div>
+          <div class="field"><label>材料</label><select id="mm_material"></select></div>
+          <div class="field optional-custom" id="customMaterialWrap"><label>その他の材料名</label><input id="mm_name_custom" placeholder="材料名を入力"></div>
           <div class="field"><label>規格・グレード</label><select id="mm_spec"></select></div>
-          <div class="field hidden" id="mm_spec_other_wrap"><label>規格（自由入力）</label><input id="mm_spec_other"></div>
-          <div class="field"><label>厚み</label><select id="mm_thickness">
-            <option value="">なし・該当なし</option><option value="0.05">0.05 mm</option><option value="0.08">0.08 mm</option><option value="0.1">0.10 mm</option><option value="0.15">0.15 mm</option><option value="0.2">0.20 mm</option><option value="0.3">0.30 mm</option><option value="0.4">0.40 mm</option><option value="0.5">0.50 mm</option><option value="0.8">0.80 mm</option><option value="1.0">1.00 mm</option><option value="1.5">1.50 mm</option><option value="2.0">2.00 mm</option>
-          </select></div>
-          <div class="field"><label>購入サイズ</label><select id="mm_size_preset">
-            <option value="">選択してください</option><option value="1000x2000">1000 × 2000 mm</option><option value="1000x1000">1000 × 1000 mm</option><option value="500x1000">500 × 1000 mm</option><option value="roll100">幅100 mm × 100m巻</option><option value="roll150">幅150 mm × 100m巻</option><option value="roll200">幅200 mm × 100m巻</option><option value="roll250">幅250 mm × 100m巻</option><option value="roll300">幅300 mm × 100m巻</option><option value="roll400">幅400 mm × 100m巻</option><option value="roll500">幅500 mm × 100m巻</option><option value="roll600">幅600 mm × 100m巻</option><option value="other">その他</option>
-          </select></div>
-          <div class="field hidden" id="mm_size_other_wrap"><label>幅 mm</label><input type="number" step="any" id="mm_width"></div>
-          <div class="field hidden" id="mm_length_wrap"><label>長さ</label><input type="number" step="any" id="mm_length"></div>
-          <div class="field hidden" id="mm_length_unit_wrap"><label>長さ単位</label><select id="mm_length_unit"><option value="mm">mm</option><option value="m">m</option></select></div>
-          <div class="field"><label>購入形態</label><select id="mm_purchase_form">
-            <option value="板">板</option><option value="100m巻">100m巻</option><option value="50m巻">50m巻</option><option value="16kg缶">16kg缶</option><option value="4kg缶">4kg缶</option><option value="1kg缶">1kg缶</option><option value="その他">その他</option>
-          </select></div>
-          <div class="field"><label>在庫単位 必須</label><select id="mm_stock_unit"><option value="枚">枚</option><option value="巻">巻</option><option value="缶">缶</option><option value="kg">kg</option><option value="本">本</option><option value="個">個</option></select></div>
-          <div class="field"><label>1単位重量 kg</label><input type="number" step="any" id="mm_weight" placeholder="必要な場合だけ"></div>
+          <div class="field optional-custom" id="customSpecWrap"><label>その他の規格</label><input id="mm_spec_custom" placeholder="規格を入力"></div>
+          <div class="field"><label>厚み</label><select id="mm_thickness"></select></div>
+          <div class="field optional-custom" id="customThicknessWrap"><label>その他の厚み mm</label><input type="number" step="any" id="mm_thickness_custom"></div>
+          <div class="field"><label>色・地色</label><select id="mm_color"></select></div>
+        </div>
+
+        <div class="section-title">② 表面・粘着・ラミネート</div>
+        <div class="material-grid">
+          <div class="field"><label>表面処理・外観</label><select id="mm_surface"></select></div>
+          <div class="field"><label>粘着</label><select id="mm_adhesive"></select></div>
+          <div class="field"><label>ラミネート</label><select id="mm_laminate"></select></div>
+        </div>
+
+        <div class="section-title">③ 購入・在庫情報</div>
+        <div class="material-grid">
+          <div class="field"><label>購入サイズ・形態</label><select id="mm_purchase_form"></select></div>
+          <div class="field optional-custom" id="customPurchaseWrap"><label>その他の購入形態</label><input id="mm_purchase_custom" placeholder="例：450mm×100m巻"></div>
+          <div class="field"><label>在庫単位</label><select id="mm_stock_unit"></select></div>
+          <div class="field"><label>1単位重量 kg</label><input type="number" step="any" id="mm_weight" placeholder="分かる場合だけ"></div>
           <div class="field"><label>主な仕入先</label><input id="mm_supplier"></div>
-          <div class="field"><label>発注点</label><select id="mm_reorder"><option value="0">未設定</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="5">5</option><option value="10">10</option><option value="20">20</option></select></div>
           <div class="field"><label>保管場所</label><input id="mm_location"></div>
           <div class="field"><label>現在庫（初期登録）</label><input type="number" step="any" id="mm_initial"></div>
+          <div class="field"><label>発注点</label><input type="number" step="any" id="mm_reorder"></div>
           <div class="field"><label>現在の仕入価格</label><input type="number" step="any" id="mm_price"></div>
           <div class="field"><label>価格基準</label><select id="mm_price_basis"><option value="stock_unit">1在庫単位あたり</option><option value="kg">1kgあたり</option><option value="purchase_unit">1購入単位あたり</option></select></div>
           <div class="field"><label>価格適用日</label><input type="date" id="mm_price_date"></div>
@@ -77,7 +82,7 @@
           <div class="field"><label>区分</label><select id="mv_type"><option value="in">入庫</option><option value="out">出庫</option><option value="adjust">棚卸調整</option></select></div>
           <div class="field"><label>数量</label><input type="number" step="any" id="mv_qty"></div>
           <div class="field"><label>日付</label><input type="date" id="mv_date"></div>
-          <div class="field"><label>仕入先・払出先</label><input id="mv_destination"></div>
+          <div class="field"><label>仕入先・払出先</label><input id="mv_destination" placeholder="第一工場 / ○○商事"></div>
           <div class="field"><label>今回単価（任意）</label><input type="number" step="any" id="mv_price"></div>
         </div>
         <div class="field"><label>メモ</label><textarea id="mv_memo"></textarea></div>
