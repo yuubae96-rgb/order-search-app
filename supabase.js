@@ -15,5 +15,5 @@ function loadAppModule(src){
   document.head.appendChild(s);
 }
 
-loadAppModule('materials-inline.js?v=20260818-2348');
-loadAppModule('quote-material-link.js?v=20260818-2348');
+loadAppModule('materials-inline.js?v=20260818-2359');
+loadAppModule('quote-material-link.js?v=20260818-2359');
