@@ -7,3 +7,8 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_PUBLISHABLE_KEY
 );
 window.supabaseClient = supabaseClient;
+
+const pricingSettingsScript = document.createElement('script');
+pricingSettingsScript.src = 'pricing-settings.js?v=20260819-0018';
+pricingSettingsScript.async = false;
+document.head.appendChild(pricingSettingsScript);
