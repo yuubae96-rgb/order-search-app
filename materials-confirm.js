@@ -16,9 +16,9 @@ window.alert=function(message){
  const bg=isIn?'#ecfdf3':'#fff1f2';
  const el=ensureToast();
  el.style.background=bg;
- el.innerHTML=`<div style="font-size:30px;margin-bottom:7px">${isIn?'✓':'✓'}</div><div><span style="color:${color};font-size:24px">${word}</span></div><div style="margin-top:7px;font-size:22px"><b>${qty.toLocaleString('ja-JP')}${unit}</b> ${word}しました</div>`;
+ el.innerHTML=`<div style="font-size:30px;margin-bottom:7px">✓</div><div><span style="color:${color};font-size:24px">${word}</span></div><div style="margin-top:7px;font-size:22px"><b>${qty.toLocaleString('ja-JP')}${unit}</b> ${word}しました</div>`;
  el.style.display='block';
  clearTimeout(window.__movementToastTimer);
- window.__movementToastTimer=setTimeout(()=>{el.style.display='none';},1800);
+ window.__movementToastTimer=setTimeout(()=>{el.style.display='none';},5000);
 };
 })();
