@@ -39,7 +39,6 @@
   </div>
 </div>
 
-
 <div class="topbar">
   <div class="topbar-inner">
     <div class="plate-badge">見</div>
@@ -51,413 +50,105 @@
 </div>
 
 <main>
-
   <!-- ============ 見積もり登録 ============ -->
   <section class="screen active" id="screen-register" data-screen="register">
     <div class="card">
       <div class="card-title" id="formCardTitle">新規見積もりの登録</div>
       <form id="orderForm">
         <div class="row2">
-          <div class="field">
-            <label>見積日<span class="req">必須</span></label>
-            <input type="date" id="f_orderDate" required>
-          </div>
-          <div class="field">
-            <label>納期<span class="opt">任意</span></label>
-            <input type="date" id="f_dueDate">
-          </div>
+          <div class="field"><label>見積日<span class="req">必須</span></label><input type="date" id="f_orderDate" required></div>
+          <div class="field"><label>納期<span class="opt">任意</span></label><input type="date" id="f_dueDate"></div>
         </div>
-        <div class="field">
-          <label>会社名<span class="req">必須</span></label>
-          <input type="text" id="f_company" placeholder="例）TOTO株式会社" required>
+        <div class="field"><label>会社名<span class="req">必須</span></label><input type="text" id="f_company" placeholder="例）TOTO株式会社" required></div>
+        <div class="row2">
+          <div class="field"><label>見積番号<span class="opt">任意</span></label><input type="text" id="f_orderNumber" placeholder="例）EST-2026-001"></div>
+          <div class="field"><label>担当者<span class="opt">任意</span></label><input type="text" id="f_staff" placeholder="例）山田"></div>
+        </div>
+        <div class="field"><label>品名<span class="opt">任意</span></label><input type="text" id="f_itemName" placeholder="例）ステンレス銘板 A社ロゴ入り"></div>
+        <div class="field"><label>見積結果</label><select id="f_result"><option value="pending">回答待ち</option><option value="won">受注</option><option value="lost">失注</option></select></div>
+        <div class="row2">
+          <div class="field"><label>材質<span class="opt">任意</span></label><select id="f_material"><option value="">選択してください</option><option value="アルミ">アルミ</option><option value="ステンレス">ステンレス</option><option value="真鍮">真鍮</option><option value="カラーアルマイト">カラーアルマイト</option><option value="その他">その他</option></select></div>
+          <div class="field"><label>板厚（mm）<span class="opt">任意</span></label><input type="number" id="f_thickness" min="0" step="0.01" placeholder="例）2.0"></div>
+        </div>
+        <div class="field" id="materialOtherField" style="display:none;"><label>材質名（自由入力）</label><input type="text" id="f_materialOther" placeholder="例）チタン"></div>
+        <div class="row2">
+          <div class="field"><label>縦サイズ（mm）<span class="opt">任意</span></label><input type="number" id="f_sizeV" min="0" step="0.1" placeholder="例）120"></div>
+          <div class="field"><label>横サイズ（mm）<span class="opt">任意</span></label><input type="number" id="f_sizeH" min="0" step="0.1" placeholder="例）300"></div>
         </div>
         <div class="row2">
-          <div class="field">
-            <label>見積番号<span class="opt">任意</span></label>
-            <input type="text" id="f_orderNumber" placeholder="例）EST-2026-001">
-          </div>
-          <div class="field">
-            <label>担当者<span class="opt">任意</span></label>
-            <input type="text" id="f_staff" placeholder="例）山田">
-          </div>
+          <div class="field"><label>見積金額（円）<span class="req">必須</span></label><input type="number" id="f_amount" min="0" step="1" placeholder="0" required></div>
+          <div class="field"><label>数量<span class="opt">任意</span></label><input type="number" id="f_quantity" min="0" step="1" placeholder="1"></div>
         </div>
-        <div class="field">
-          <label>品名<span class="opt">任意</span></label>
-          <input type="text" id="f_itemName" placeholder="例）ステンレス銘板 A社ロゴ入り">
-        </div>
-        <div class="field">
-          <label>見積結果</label>
-          <select id="f_result">
-            <option value="pending">回答待ち</option>
-            <option value="won">受注</option>
-            <option value="lost">失注</option>
-          </select>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label>材質<span class="opt">任意</span></label>
-            <select id="f_material">
-              <option value="">選択してください</option>
-              <option value="アルミ">アルミ</option>
-              <option value="ステンレス">ステンレス</option>
-              <option value="真鍮">真鍮</option>
-              <option value="カラーアルマイト">カラーアルマイト</option>
-              <option value="その他">その他</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>板厚（mm）<span class="opt">任意</span></label>
-            <input type="number" id="f_thickness" min="0" step="0.01" placeholder="例）2.0">
-          </div>
-        </div>
-        <div class="field" id="materialOtherField" style="display:none;">
-          <label>材質名（自由入力）</label>
-          <input type="text" id="f_materialOther" placeholder="例）チタン">
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label>縦サイズ（mm）<span class="opt">任意</span></label>
-            <input type="number" id="f_sizeV" min="0" step="0.1" placeholder="例）120">
-          </div>
-          <div class="field">
-            <label>横サイズ（mm）<span class="opt">任意</span></label>
-            <input type="number" id="f_sizeH" min="0" step="0.1" placeholder="例）300">
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label>見積金額（円）<span class="req">必須</span></label>
-            <input type="number" id="f_amount" min="0" step="1" placeholder="0" required>
-          </div>
-          <div class="field">
-            <label>数量<span class="opt">任意</span></label>
-            <input type="number" id="f_quantity" min="0" step="1" placeholder="1">
-          </div>
-        </div>
-        <div class="field">
-          <label>備考<span class="opt">任意</span></label>
-          <textarea id="f_note" placeholder="特記事項があれば入力してください"></textarea>
-        </div>
-                <div class="field">
-          <label>図面・添付ファイル<span class="opt">任意</span></label>
-          <input type="file" id="f_drawing">
-          <div id="drawingStatus"></div>
-        </div>
-        <div class="btn-row">
-          <button type="submit" class="btn btn-primary btn-block" id="submitBtn">登録する</button>
-          <button type="button" class="btn btn-ghost" id="cancelEditBtn" style="display:none;">キャンセル</button>
-        </div>
+        <div class="field"><label>備考<span class="opt">任意</span></label><textarea id="f_note" placeholder="特記事項があれば入力してください"></textarea></div>
+        <div class="field"><label>図面・添付ファイル<span class="opt">任意</span></label><input type="file" id="f_drawing"><div id="drawingStatus"></div></div>
+        <div class="btn-row"><button type="submit" class="btn btn-primary btn-block" id="submitBtn">登録する</button><button type="button" class="btn btn-ghost" id="cancelEditBtn" style="display:none;">キャンセル</button></div>
       </form>
     </div>
-
-    <div class="card" id="recentCard">
-      <div class="card-title">最近登録した見積もり</div>
-      <div id="recentList"></div>
-    </div>
+    <div class="card" id="recentCard"><div class="card-title">最近登録した見積もり</div><div id="recentList"></div></div>
   </section>
 
   <!-- ============ 見積もり検索 ============ -->
   <section class="screen" id="screen-search" data-screen="search">
     <div class="card">
       <div class="card-title">期間をワンタッチで指定</div>
-      <div class="chip-row" id="periodChips">
-        <button class="chip" data-period="thisMonth">今月</button>
-        <button class="chip" data-period="lastMonth">先月</button>
-        <button class="chip" data-period="last30">過去30日</button>
-        <button class="chip" data-period="thisYear">今年</button>
-        <button class="chip active" data-period="all">すべて</button>
-      </div>
+      <div class="chip-row" id="periodChips"><button class="chip" data-period="thisMonth">今月</button><button class="chip" data-period="lastMonth">先月</button><button class="chip" data-period="last30">過去30日</button><button class="chip" data-period="thisYear">今年</button><button class="chip active" data-period="all">すべて</button></div>
       <div class="card-title">見積結果で絞り込み</div>
-      <div class="chip-row" id="resultChips">
-        <button class="chip active" data-result="">すべて</button>
-        <button class="chip" data-result="pending">回答待ちだけ</button>
-        <button class="chip" data-result="won">受注だけ</button>
-        <button class="chip" data-result="lost">失注だけ</button>
-      </div>
+      <div class="chip-row" id="resultChips"><button class="chip active" data-result="">すべて</button><button class="chip" data-result="pending">回答待ちだけ</button><button class="chip" data-result="won">受注だけ</button><button class="chip" data-result="lost">失注だけ</button></div>
       <div class="card-title">絞り込み条件</div>
       <div class="filter-grid">
-        <div class="field">
-          <label>会社名（部分一致）</label>
-          <input type="text" id="s_company" placeholder="例）TOTO">
-        </div>
-        <div class="field">
-          <label>見積番号</label>
-          <input type="text" id="s_orderNumber" placeholder="部分一致OK">
-        </div>
-        <div class="field">
-          <label>見積日（開始）</label>
-          <input type="date" id="s_startDate">
-        </div>
-        <div class="field">
-          <label>見積日（終了）</label>
-          <input type="date" id="s_endDate">
-        </div>
-        <div class="field">
-          <label>品名</label>
-          <input type="text" id="s_itemName" placeholder="部分一致OK">
-        </div>
-        <div class="field">
-          <label>担当者</label>
-          <input type="text" id="s_staff" placeholder="部分一致OK">
-        </div>
-        <div class="field">
-          <label>材質</label>
-          <select id="s_material">
-            <option value="">すべて</option>
-            <option value="アルミ">アルミ</option>
-            <option value="ステンレス">ステンレス</option>
-            <option value="真鍮">真鍮</option>
-            <option value="カラーアルマイト">カラーアルマイト</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>板厚（mm）</label>
-          <input type="number" id="s_thickness" step="0.01" placeholder="例）2.0">
-        </div>
-        <div class="field">
-          <label>縦サイズ（mm）</label>
-          <input type="number" id="s_sizeV" step="0.1" placeholder="例）120">
-        </div>
-        <div class="field">
-          <label>横サイズ（mm）</label>
-          <input type="number" id="s_sizeH" step="0.1" placeholder="例）300">
-        </div>
+        <div class="field"><label>会社名（部分一致）</label><input type="text" id="s_company" placeholder="例）TOTO"></div>
+        <div class="field"><label>見積番号</label><input type="text" id="s_orderNumber" placeholder="部分一致OK"></div>
+        <div class="field"><label>見積日（開始）</label><input type="date" id="s_startDate"></div>
+        <div class="field"><label>見積日（終了）</label><input type="date" id="s_endDate"></div>
+        <div class="field"><label>品名</label><input type="text" id="s_itemName" placeholder="部分一致OK"></div>
+        <div class="field"><label>担当者</label><input type="text" id="s_staff" placeholder="部分一致OK"></div>
+        <div class="field"><label>材質</label><select id="s_material"><option value="">すべて</option><option value="アルミ">アルミ</option><option value="ステンレス">ステンレス</option><option value="真鍮">真鍮</option><option value="カラーアルマイト">カラーアルマイト</option><option value="その他">その他</option></select></div>
+        <div class="field"><label>板厚（mm）</label><input type="number" id="s_thickness" step="0.01" placeholder="例）2.0"></div>
+        <div class="field"><label>縦サイズ（mm）</label><input type="number" id="s_sizeV" step="0.1" placeholder="例）120"></div>
+        <div class="field"><label>横サイズ（mm）</label><input type="number" id="s_sizeH" step="0.1" placeholder="例）300"></div>
       </div>
       <button class="btn btn-ghost btn-block" id="clearFilterBtn">条件をクリア</button>
     </div>
-
-    <div class="summary-plate">
-      <div class="summary-grid">
-        <div class="summary-item">
-          <div class="label">該当見積件数</div>
-          <div class="value nums" id="sumCount">0<small> 件</small></div>
-        </div>
-        <div class="summary-item">
-          <div class="label">見積金額合計</div>
-          <div class="value nums" id="sumTotal">0<small> 円</small></div>
-        </div>
-        <div class="summary-item">
-          <div class="label">平均見積金額</div>
-          <div class="value nums" id="sumAvg">0<small> 円</small></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="padding-bottom:8px;">
-      <div class="field" style="margin-bottom:0;">
-        <label>並べ替え</label>
-        <select id="sortKey" class="sort-select">
-          <option value="date_desc">見積日：新しい順</option>
-          <option value="date_asc">見積日：古い順</option>
-          <option value="amount_desc">金額：高い順</option>
-          <option value="amount_asc">金額：低い順</option>
-          <option value="company">会社名順</option>
-        </select>
-      </div>
-    </div>
-
+    <div class="summary-plate"><div class="summary-grid"><div class="summary-item"><div class="label">該当見積件数</div><div class="value nums" id="sumCount">0<small> 件</small></div></div><div class="summary-item"><div class="label">見積金額合計</div><div class="value nums" id="sumTotal">0<small> 円</small></div></div><div class="summary-item"><div class="label">平均見積金額</div><div class="value nums" id="sumAvg">0<small> 円</small></div></div></div></div>
+    <div class="card" style="padding-bottom:8px;"><div class="field" style="margin-bottom:0;"><label>並べ替え</label><select id="sortKey" class="sort-select"><option value="date_desc">見積日：新しい順</option><option value="date_asc">見積日：古い順</option><option value="amount_desc">金額：高い順</option><option value="amount_asc">金額：低い順</option><option value="company">会社名順</option></select></div></div>
     <div id="searchResults"></div>
   </section>
 
   <!-- ============ 見積分析 ============ -->
   <section class="screen" id="screen-analysis" data-screen="analysis">
-    <div class="stat-cards">
-      <div class="card">
-        <div class="stat-label">今月の見積件数</div>
-        <div class="stat-value nums" id="an_thisMonthCount">0<small> 件</small></div>
-      </div>
-      <div class="card">
-        <div class="stat-label">今月の見積金額合計</div>
-        <div class="stat-value nums" id="an_thisMonth">0<small> 円</small></div>
-      </div>
-      <div class="card">
-        <div class="stat-label">先月の見積金額合計</div>
-        <div class="stat-value nums" id="an_lastMonth">0<small> 円</small></div>
-      </div>
-      <div class="card">
-        <div class="stat-label">今年の見積金額合計</div>
-        <div class="stat-value nums" id="an_thisYear">0<small> 円</small></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">見積結果の集計（全期間）</div>
-      <div class="result-stat-grid">
-        <div class="result-stat pending"><div class="n nums" id="an_pendingCount">0</div><div class="l">回答待ち</div></div>
-        <div class="result-stat won"><div class="n nums" id="an_wonCount">0</div><div class="l">受注</div></div>
-        <div class="result-stat lost"><div class="n nums" id="an_lostCount">0</div><div class="l">失注</div></div>
-        <div class="result-stat rate"><div class="n nums" id="an_winRate">—</div><div class="l">受注率</div></div>
-      </div>
-      <div class="amount-breakdown">
-        <div class="box"><div class="v nums" id="an_totalAmount">0円</div><div class="l">見積金額合計</div></div>
-        <div class="box"><div class="v nums" id="an_wonAmount">0円</div><div class="l">受注金額合計</div></div>
-        <div class="box"><div class="v nums" id="an_lostAmount">0円</div><div class="l">失注金額合計</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">会社別見積件数ランキング（上位10社）</div>
-      <div id="rankingCountList"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">会社別見積金額ランキング（上位10社）</div>
-      <div id="rankingAmountList"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">会社別の受注状況</div>
-      <div class="card-sub">見積件数の多い順に表示しています</div>
-      <div id="companyStatusList"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">材質別の集計</div>
-      <div id="materialStatsList"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">会社ごとの詳細</div>
-      <div class="field" style="margin-bottom:12px;">
-        <label>会社を選んで絞り込み</label>
-        <select id="an_companySelect">
-          <option value="">すべての会社（合計）</option>
-        </select>
-      </div>
-      <div id="companyDetail"></div>
-      <div class="subhead">月別見積件数推移</div>
-      <div id="monthlyCountTrend"></div>
-      <div class="subhead">月別見積金額推移</div>
-      <div id="monthlyTrend"></div>
-    </div>
+    <div class="stat-cards"><div class="card"><div class="stat-label">今月の見積件数</div><div class="stat-value nums" id="an_thisMonthCount">0<small> 件</small></div></div><div class="card"><div class="stat-label">今月の見積金額合計</div><div class="stat-value nums" id="an_thisMonth">0<small> 円</small></div></div><div class="card"><div class="stat-label">先月の見積金額合計</div><div class="stat-value nums" id="an_lastMonth">0<small> 円</small></div></div><div class="card"><div class="stat-label">今年の見積金額合計</div><div class="stat-value nums" id="an_thisYear">0<small> 円</small></div></div></div>
+    <div class="card"><div class="card-title">見積結果の集計（全期間）</div><div class="result-stat-grid"><div class="result-stat pending"><div class="n nums" id="an_pendingCount">0</div><div class="l">回答待ち</div></div><div class="result-stat won"><div class="n nums" id="an_wonCount">0</div><div class="l">受注</div></div><div class="result-stat lost"><div class="n nums" id="an_lostCount">0</div><div class="l">失注</div></div><div class="result-stat rate"><div class="n nums" id="an_winRate">—</div><div class="l">受注率</div></div></div><div class="amount-breakdown"><div class="box"><div class="v nums" id="an_totalAmount">0円</div><div class="l">見積金額合計</div></div><div class="box"><div class="v nums" id="an_wonAmount">0円</div><div class="l">受注金額合計</div></div><div class="box"><div class="v nums" id="an_lostAmount">0円</div><div class="l">失注金額合計</div></div></div></div>
+    <div class="card"><div class="card-title">会社別見積件数ランキング（上位10社）</div><div id="rankingCountList"></div></div>
+    <div class="card"><div class="card-title">会社別見積金額ランキング（上位10社）</div><div id="rankingAmountList"></div></div>
+    <div class="card"><div class="card-title">会社別の受注状況</div><div class="card-sub">見積件数の多い順に表示しています</div><div id="companyStatusList"></div></div>
+    <div class="card"><div class="card-title">材質別の集計</div><div id="materialStatsList"></div></div>
+    <div class="card"><div class="card-title">会社ごとの詳細</div><div class="field" style="margin-bottom:12px;"><label>会社を選んで絞り込み</label><select id="an_companySelect"><option value="">すべての会社（合計）</option></select></div><div id="companyDetail"></div><div class="subhead">月別見積件数推移</div><div id="monthlyCountTrend"></div><div class="subhead">月別見積金額推移</div><div id="monthlyTrend"></div></div>
   </section>
 
   <!-- ============ 設定 ============ -->
   <section class="screen" id="screen-settings" data-screen="settings">
-    <div class="card">
-      <div class="card-title">クラウド接続</div>
-      <div class="settings-row">
-        <div>
-          <div class="t">ログイン中</div>
-          <div class="d" id="cloudUserEmail">確認中...</div>
-        </div>
-        <button class="btn btn-ghost btn-sm" id="logoutBtn">ログアウト</button>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="t">旧端末データを移行</div>
-          <div class="d">この端末に残っている旧localStorageデータをSupabaseへコピーします</div>
-        </div>
-        <button class="btn btn-secondary btn-sm" id="migrateLocalBtn">移行</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">データのバックアップ</div>
-      <div class="settings-row">
-        <div>
-          <div class="t">CSV出力</div>
-          <div class="d">登録済みの全見積データをCSVファイルとして保存します</div>
-        </div>
-        <button class="btn btn-secondary btn-sm" id="exportCsvBtn">出力</button>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="t">CSV読込</div>
-          <div class="d">CSVファイルから見積データを復元・追加します</div>
-        </div>
-        <label class="file-input-label">
-          <span class="btn btn-secondary btn-sm">読込</span>
-          <input type="file" id="importCsvInput" accept=".csv,text/csv">
-        </label>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">データ管理</div>
-      <div class="settings-row">
-        <div>
-          <div class="t">登録件数</div>
-          <div class="d">現在クラウドに保存されている見積データ</div>
-        </div>
-        <div class="nums" style="font-weight:700;" id="settingsCount">0 件</div>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="t">全件削除</div>
-          <div class="d">登録済みの見積データをすべて削除します</div>
-        </div>
-        <button class="btn btn-danger btn-sm" id="deleteAllBtn">削除</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">保存場所について</div>
-      <div class="info-box">
-        見積データはSupabaseのクラウドデータベースに保存されます。<br><br>
-        同じログイン情報を使えば、会社のパソコンとiPhoneから同じ見積データを登録・検索・編集できます。CSV出力はバックアップとして引き続き利用できます。
-      </div>
-    </div>
+    <div class="card"><div class="card-title">クラウド接続</div><div class="settings-row"><div><div class="t">ログイン中</div><div class="d" id="cloudUserEmail">確認中...</div></div><button class="btn btn-ghost btn-sm" id="logoutBtn">ログアウト</button></div><div class="settings-row"><div><div class="t">旧端末データを移行</div><div class="d">この端末に残っている旧localStorageデータをSupabaseへコピーします</div></div><button class="btn btn-secondary btn-sm" id="migrateLocalBtn">移行</button></div></div>
+    <div class="card"><div class="card-title">データのバックアップ</div><div class="settings-row"><div><div class="t">CSV出力</div><div class="d">登録済みの全見積データをCSVファイルとして保存します</div></div><button class="btn btn-secondary btn-sm" id="exportCsvBtn">出力</button></div><div class="settings-row"><div><div class="t">CSV読込</div><div class="d">CSVファイルから見積データを復元・追加します</div></div><label class="file-input-label"><span class="btn btn-secondary btn-sm">読込</span><input type="file" id="importCsvInput" accept=".csv,text/csv"></label></div></div>
+    <div class="card"><div class="card-title">データ管理</div><div class="settings-row"><div><div class="t">登録件数</div><div class="d">現在クラウドに保存されている見積データ</div></div><div class="nums" style="font-weight:700;" id="settingsCount">0 件</div></div><div class="settings-row"><div><div class="t">全件削除</div><div class="d">登録済みの見積データをすべて削除します</div></div><button class="btn btn-danger btn-sm" id="deleteAllBtn">削除</button></div></div>
+    <div class="card"><div class="card-title">保存場所について</div><div class="info-box">見積データはSupabaseのクラウドデータベースに保存されます。<br><br>同じログイン情報を使えば、会社のパソコンとiPhoneから同じ見積データを登録・検索・編集できます。CSV出力はバックアップとして引き続き利用できます。</div></div>
   </section>
-
 </main>
 
-<div class="tabbar">
-  <div class="tabbar-inner">
-    <button class="tab-btn active" data-goto="register">
-      <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 9v6M9 12h6"/></svg>
-      <span>見積登録</span>
-    </button>
-    <button class="tab-btn" data-goto="search">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>
-      <span>見積検索</span>
-    </button>
-    <button class="tab-btn" data-goto="analysis">
-      <svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>
-      <span>見積分析</span>
-    </button>
-    <button class="tab-btn" data-goto="settings">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 000-2l2-1.5-2-3.4-2.3.9a8 8 0 00-1.8-1l-.3-2.5h-4l-.3 2.5a8 8 0 00-1.8 1l-2.3-.9-2 3.4L6.6 11a7.9 7.9 0 000 2l-2 1.5 2 3.4 2.3-.9a8 8 0 001.8 1l.3 2.5h4l.3-2.5a8 8 0 001.8-1l2.3.9 2-3.4z"/></svg>
-      <span>設定</span>
-    </button>
-  </div>
-</div>
+<div class="tabbar"><div class="tabbar-inner">
+<button class="tab-btn active" data-goto="register"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 9v6M9 12h6"/></svg><span>見積登録</span></button>
+<button class="tab-btn" data-goto="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg><span>見積検索</span></button>
+<button class="tab-btn" data-goto="analysis"><svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg><span>見積分析</span></button>
+<button class="tab-btn" data-goto="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 000-2l2-1.5-2-3.4-2.3.9a8 8 0 00-1.8-1l-.3-2.5h-4l-.3 2.5a8 8 0 00-1.8 1l-2.3-.9-2 3.4L6.6 11a7.9 7.9 0 000 2l-2 1.5 2 3.4 2.3-.9a8 8 0 001.8 1l.3 2.5h4l.3-2.5a8 8 0 001.8-1l2.3.9 2-3.4z"/></svg><span>設定</span></button>
+</div></div>
 
 <div class="toast" id="toast"></div>
-
-<!-- 削除確認モーダル -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="modal-sheet">
-    <div class="modal-title">全件削除の確認</div>
-    <div class="modal-text">
-      登録されている見積データを<b>すべて削除</b>します。この操作は取り消せません。<br><br>
-      よろしければ下の欄に「<b>削除する</b>」と入力してください。
-    </div>
-    <div class="field">
-      <input type="text" id="deleteConfirmInput" placeholder="削除する">
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" id="deleteCancelBtn">キャンセル</button>
-      <button class="btn btn-danger" id="deleteConfirmBtn" disabled>完全に削除する</button>
-    </div>
-  </div>
-</div>
-
-<!-- 個別削除確認モーダル -->
-<div class="modal-overlay" id="deleteOneModal">
-  <div class="modal-sheet">
-    <div class="modal-title">見積データの削除</div>
-    <div class="modal-text" id="deleteOneText">この見積データを削除します。よろしいですか？</div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" id="deleteOneCancelBtn">キャンセル</button>
-      <button class="btn btn-danger" id="deleteOneConfirmBtn">削除する</button>
-    </div>
-  </div>
-</div>
+<div class="modal-overlay" id="deleteModal"><div class="modal-sheet"><div class="modal-title">全件削除の確認</div><div class="modal-text">登録されている見積データを<b>すべて削除</b>します。この操作は取り消せません。<br><br>よろしければ下の欄に「<b>削除する</b>」と入力してください。</div><div class="field"><input type="text" id="deleteConfirmInput" placeholder="削除する"></div><div class="btn-row"><button class="btn btn-ghost" id="deleteCancelBtn">キャンセル</button><button class="btn btn-danger" id="deleteConfirmBtn" disabled>完全に削除する</button></div></div></div>
+<div class="modal-overlay" id="deleteOneModal"><div class="modal-sheet"><div class="modal-title">見積データの削除</div><div class="modal-text" id="deleteOneText">この見積データを削除します。よろしいですか？</div><div class="btn-row"><button class="btn btn-ghost" id="deleteOneCancelBtn">キャンセル</button><button class="btn btn-danger" id="deleteOneConfirmBtn">削除する</button></div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- Supabase接続設定とアプリ本体を分離 -->
-<script src="supabase.js"></script>
-<script src="app.js"></script>
+<script src="supabase.js?v=20260818-2358"></script>
+<script src="app.js?v=20260818-2358"></script>
+<script src="materials-inline.js?v=20260818-2358"></script>
+<script src="quote-material-link.js?v=20260818-2358"></script>
 </body>
 </html>
