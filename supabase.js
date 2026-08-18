@@ -8,7 +8,7 @@ const supabaseClient = window.supabase.createClient(
 );
 window.supabaseClient = supabaseClient;
 
-const pricingSettingsScript = document.createElement('script');
-pricingSettingsScript.src = 'pricing-settings.js?v=20260819-0018';
-pricingSettingsScript.async = false;
-document.head.appendChild(pricingSettingsScript);
+const nameplateIntegrationScript = document.createElement('script');
+nameplateIntegrationScript.src = 'nameplate-integration.js?v=20260819-0025';
+nameplateIntegrationScript.async = false;
+document.head.appendChild(nameplateIntegrationScript);
