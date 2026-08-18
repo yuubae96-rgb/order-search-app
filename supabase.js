@@ -18,5 +18,6 @@ function loadCompanyModule(src){
 loadCompanyModule('nameplate-integration.js?v=20260819-0025');
 loadCompanyModule('cost-master.js?v=20260819-0035');
 loadCompanyModule('workforce-cost.js?v=20260819-0040');
-loadCompanyModule('management-hub.js?v=20260819-0055');
+loadCompanyModule('management-hub.js?v=20260819-0065');
 loadCompanyModule('access-control.js?v=20260819-0060');
+loadCompanyModule('user-admin.js?v=20260819-0065');
