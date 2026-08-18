@@ -8,7 +8,7 @@ function loadCompanyModule(src){const s=document.createElement('script');s.src=s
 loadCompanyModule('nameplate-integration.js?v=20260819-0025');
 loadCompanyModule('cost-master.js?v=20260819-0035');
 loadCompanyModule('workforce-cost.js?v=20260819-0040');
-loadCompanyModule('management-hub.js?v=20260819-0110');
+loadCompanyModule('management-hub.js?v=20260819-0130');
 loadCompanyModule('access-control.js?v=20260819-0070');
 loadCompanyModule('user-admin.js?v=20260819-0120');
 loadCompanyModule('factory-mode.js?v=20260819-0085');
