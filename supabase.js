@@ -18,3 +18,4 @@ loadCompanyModule('management-summary.js?v=20260819-0095');
 loadCompanyModule('office-summary.js?v=20260819-0100');
 loadCompanyModule('sales-summary.js?v=20260819-0110');
 loadCompanyModule('production-summary.js?v=20260819-0110');
+loadCompanyModule('materials-patch.js?v=20260819-0135');
