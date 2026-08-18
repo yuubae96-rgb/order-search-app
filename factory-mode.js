@@ -1,6 +1,44 @@
 (function(){
 'use strict';
 function wait(){if(!document.getElementById('screen-materials')){setTimeout(wait,250);return;}if(new URLSearchParams(location.search).get('entry')!=='factory')return;apply();}
-function apply(){document.body.classList.add('factory-mode');const s=document.createElement('style');s.textContent=`body.factory-mode header .subtitle{display:none!important}body.factory-mode .tabbar{display:none!important}body.factory-mode main{padding-bottom:24px!important}body.factory-mode #screen-materials>.mi-summary{grid-template-columns:1fr 1fr!important}body.factory-mode #miValue{display:none!important}body.factory-mode #miValue.closest{}body.factory-mode .mi-tabs{display:grid!important;grid-template-columns:repeat(2,1fr)!important;overflow:visible!important}body.factory-mode .mi-tab{border-radius:12px!important;padding:14px 6px!important}body.factory-mode .mi-tab[data-mi="master"]{display:none!important}body.factory-mode #mi-master{display:none!important}body.factory-mode #screen-materials{max-width:760px;margin:auto}body.factory-mode #screen-materials:before{content:'工場　在庫管理';display:block;font-size:24px;font-weight:900;margin:4px 0 14px}`;document.head.appendChild(s);const tabs=[...document.querySelectorAll('.mi-tab')];tabs.forEach(b=>{if(b.dataset.mi==='list')b.textContent='現在庫';if(b.dataset.mi==='move')b.textContent='入庫・出庫';if(b.dataset.mi==='history')b.textContent='履歴';});const summary=document.querySelector('.mi-summary');if(summary){const cards=[...summary.children];if(cards[2])cards[2].style.display='none';}const list=document.getElementById('mi-list');if(list){const note=document.createElement('div');note.style.cssText='background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:11px 13px;margin-bottom:10px;font-size:13px;line-height:1.6';note.textContent='材料の残数を確認します。発注点以下の材料はアラート表示されます。';list.prepend(note);}const move=document.getElementById('mi-move');if(move){const note=document.createElement('div');note.style.cssText='background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:11px 13px;margin-bottom:10px;font-size:13px;line-height:1.6';note.textContent='材料が入ったら「入庫」、工場で使ったら「出庫」を登録してください。';move.prepend(note);}}
+function apply(){
+ document.body.classList.add('factory-mode');
+ const s=document.createElement('style');
+ s.textContent=`
+ body.factory-mode header .subtitle{display:none!important}
+ body.factory-mode .tabbar{display:none!important}
+ body.factory-mode main{padding-bottom:24px!important}
+ body.factory-mode #screen-materials>.mi-summary{grid-template-columns:1fr 1fr!important}
+ body.factory-mode .mi-tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;overflow:visible!important}
+ body.factory-mode .mi-tab{border-radius:12px!important;padding:14px 4px!important}
+ body.factory-mode .mi-tab[data-mi="master"]{display:none!important}
+ body.factory-mode #mi-master{display:none!important}
+ body.factory-mode #screen-materials{max-width:760px;margin:auto}
+ body.factory-mode #screen-materials:before{content:'工場　在庫管理';display:block;font-size:24px;font-weight:900;margin:4px 0 14px}
+ body.factory-mode #miMvDest,body.factory-mode #miMvPrice,body.factory-mode #miMvMemo{display:none!important}
+ body.factory-mode #miMvDest.closest,body.factory-mode #miMvPrice.closest,body.factory-mode #miMvMemo.closest{display:none!important}
+ body.factory-mode .factory-hidden{display:none!important}
+ .fm-type-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 14px}
+ .fm-type-btn{border:2px solid #cbd5e1;background:#fff;border-radius:14px;padding:16px 8px;font-size:18px;font-weight:900;color:#334155}
+ .fm-type-btn.on{background:#111827;color:#fff;border-color:#111827}
+ .fm-qty-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:7px 0 12px}
+ .fm-qty-btn{border:1px solid #cbd5e1;background:#fff;border-radius:11px;padding:13px 4px;font-size:16px;font-weight:900;color:#0f172a}
+ .fm-qty-btn:active{transform:scale(.98)}
+ body.factory-mode #miSaveMove{font-size:18px!important;min-height:56px!important}
+ `;
+ document.head.appendChild(s);
+ const tabs=[...document.querySelectorAll('.mi-tab')];
+ tabs.forEach(b=>{if(b.dataset.mi==='list')b.textContent='現在庫';if(b.dataset.mi==='move')b.textContent='入庫・出庫';if(b.dataset.mi==='history')b.textContent='履歴';});
+ const summary=document.querySelector('.mi-summary');if(summary){const cards=[...summary.children];if(cards[2])cards[2].style.display='none';}
+ const list=document.getElementById('mi-list');if(list){const note=document.createElement('div');note.style.cssText='background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:11px 13px;margin-bottom:10px;font-size:13px;line-height:1.6';note.textContent='材料の残数を確認します。発注点以下の材料はアラート表示されます。';list.prepend(note);}
+ const move=document.getElementById('mi-move');if(move){
+   const note=document.createElement('div');note.style.cssText='background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:11px 13px;margin-bottom:10px;font-size:13px;line-height:1.6';note.textContent='材料を選び、入庫か出庫、数量を選んで登録します。';move.prepend(note);
+   ['miMvDest','miMvPrice','miMvMemo'].forEach(id=>{const el=document.getElementById(id);if(el){const f=el.closest('.field');if(f)f.classList.add('factory-hidden');}});
+   const type=document.getElementById('miMvType');if(type){const f=type.closest('.field');if(f){type.style.display='none';const row=document.createElement('div');row.className='fm-type-row';row.innerHTML='<button type="button" class="fm-type-btn" data-t="in">入庫</button><button type="button" class="fm-type-btn on" data-t="out">出庫</button>';f.appendChild(row);type.value='out';row.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{type.value=b.dataset.t;row.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));});}}
+   const qty=document.getElementById('miMvQty');if(qty){const f=qty.closest('.field');if(f){const row=document.createElement('div');row.className='fm-qty-row';row.innerHTML=[1,2,5,10].map(n=>`<button type="button" class="fm-qty-btn" data-q="${n}">${n}</button>`).join('');f.appendChild(row);row.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{qty.value=b.dataset.q;qty.dispatchEvent(new Event('input',{bubbles:true}));});}}
+   const date=document.getElementById('miMvDate');if(date&& !date.value)date.value=new Date().toISOString().slice(0,10);
+   const save=document.getElementById('miSaveMove');if(save)save.textContent='この内容で登録';
+ }
+}
 wait();
 })();
