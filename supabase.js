@@ -8,13 +8,7 @@ const supabaseClient = window.supabase.createClient(
 );
 window.supabaseClient = supabaseClient;
 
-function loadCompanyModule(src){
-  const s=document.createElement('script');
-  s.src=src;
-  s.async=false;
-  document.head.appendChild(s);
-}
-
+function loadCompanyModule(src){const s=document.createElement('script');s.src=src;s.async=false;document.head.appendChild(s);}
 loadCompanyModule('nameplate-integration.js?v=20260819-0025');
 loadCompanyModule('cost-master.js?v=20260819-0035');
 loadCompanyModule('workforce-cost.js?v=20260819-0040');
@@ -25,3 +19,4 @@ loadCompanyModule('factory-mode.js?v=20260819-0085');
 loadCompanyModule('stock-alerts.js?v=20260819-0090');
 loadCompanyModule('price-link.js?v=20260819-0095');
 loadCompanyModule('management-summary.js?v=20260819-0095');
+loadCompanyModule('office-summary.js?v=20260819-0100');
