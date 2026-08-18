@@ -21,3 +21,4 @@ loadCompanyModule('workforce-cost.js?v=20260819-0040');
 loadCompanyModule('management-hub.js?v=20260819-0065');
 loadCompanyModule('access-control.js?v=20260819-0070');
 loadCompanyModule('user-admin.js?v=20260819-0065');
+loadCompanyModule('factory-mode.js?v=20260819-0075');
