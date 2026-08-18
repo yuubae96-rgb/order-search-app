@@ -23,3 +23,5 @@ loadCompanyModule('access-control.js?v=20260819-0070');
 loadCompanyModule('user-admin.js?v=20260819-0065');
 loadCompanyModule('factory-mode.js?v=20260819-0085');
 loadCompanyModule('stock-alerts.js?v=20260819-0090');
+loadCompanyModule('price-link.js?v=20260819-0095');
+loadCompanyModule('management-summary.js?v=20260819-0095');
