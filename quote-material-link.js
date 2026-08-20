@@ -35,3 +35,26 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 supabaseClient.auth.onAuthStateChange((_e,s)=>{if(s)setTimeout(()=>loadQuoteMaterials(true),50);});
 window.addEventListener('pageshow',()=>setTimeout(()=>loadQuoteMaterials(true),100));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>loadQuoteMaterials(true),100);});
+
+function reorderQuoteFormFields(){
+  const form=document.getElementById('orderForm');
+  const orderDate=document.getElementById('f_orderDate')?.closest('.field');
+  const dueDate=document.getElementById('f_dueDate')?.closest('.field');
+  const company=document.getElementById('f_company')?.closest('.field');
+  const staff=document.getElementById('f_staff')?.closest('.field');
+  const orderNumber=document.getElementById('f_orderNumber')?.closest('.field');
+  const note=document.getElementById('f_note')?.closest('.field');
+  if(!form||!orderDate||!dueDate||!company||!staff||!orderNumber||!note)return;
+
+  const dateRow=orderDate.parentElement;
+  const numberStaffRow=staff.parentElement;
+  if(dateRow?.classList.contains('row2'))dateRow.replaceWith(orderDate);
+  if(numberStaffRow?.classList.contains('row2'))numberStaffRow.remove();
+
+  orderDate.insertAdjacentElement('afterend',staff);
+  staff.insertAdjacentElement('afterend',company);
+  company.insertAdjacentElement('afterend',dueDate);
+  note.insertAdjacentElement('afterend',orderNumber);
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',reorderQuoteFormFields);else reorderQuoteFormFields();
