@@ -16,6 +16,30 @@ const supabaseClient = window.supabase.createClient(
 );
 window.supabaseClient = supabaseClient;
 
+let INVALIDATING_SESSION = null;
+async function invalidateExpiredSupabaseSession(){
+  if(!INVALIDATING_SESSION){
+    INVALIDATING_SESSION = (async()=>{
+      try{
+        await supabaseClient.auth.signOut({ scope:'local' });
+      }catch(e){
+        console.warn('古いログイン情報の破棄に失敗', e);
+      }
+      if(typeof window.showAuthGate === 'function'){
+        window.showAuthGate('ログインの有効期限が切れました。もう一度ログインしてください。');
+      }else if(typeof showAuthGate === 'function'){
+        showAuthGate('ログインの有効期限が切れました。もう一度ログインしてください。');
+      }
+      return null;
+    })().finally(()=>{ INVALIDATING_SESSION = null; });
+  }
+  return INVALIDATING_SESSION;
+}
+
+// 旧コードとの互換用。401を受けたら無効なセッションを延命せず破棄する。
+window.getFreshSupabaseAccessToken = invalidateExpiredSupabaseSession;
+window.invalidateExpiredSupabaseSession = invalidateExpiredSupabaseSession;
+
 function loadCompanyModule(src){const s=document.createElement('script');s.src=src;s.async=false;document.head.appendChild(s);}
 loadCompanyModule('nameplate-integration.js?v=20260819-0025');
 loadCompanyModule('cost-master.js?v=20260819-0035');
