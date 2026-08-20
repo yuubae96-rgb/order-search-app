@@ -13,6 +13,7 @@ function apply(){
   const thickness=document.getElementById('mm_thickness');
   const adhesive=document.getElementById('mm_adhesive');
   const laminate=document.getElementById('mm_laminate');
+  const stockUnit=document.getElementById('mm_stock_unit');
   if(!category||!material||!thickness)return false;
   const isMetal=category.value==='金属板';
   if(isMetal){
@@ -23,6 +24,9 @@ function apply(){
   }else{
     if(adhesive){const f=adhesive.closest('.field');if(f)f.style.display='';}
     if(laminate){const f=laminate.closest('.field');if(f)f.style.display='';}
+  }
+  if(stockUnit && ![...stockUnit.options].some(o=>o.value==='単位不明')){
+    stockUnit.add(new Option('単位不明','単位不明'),1);
   }
   return true;
 }
@@ -77,6 +81,30 @@ function setupSupplier(){
   applySupplierFilter();
   return true;
 }
+
+// 納品書取込で単位根拠がないシール類は「枚」と断定しない。
+// サイズ表記がある場合は、将来の複数納品実績比較で㎡単価の可能性も判定できるよう画面上に残す。
+function normalizeUnknownUnits(){
+  const rows=document.querySelectorAll('#mList .material-list-item');
+  rows.forEach(row=>{
+    const name=row.querySelector('.material-name')?.textContent||'';
+    if(!/^シール\s/.test(name))return;
+    const meta=row.querySelector('.material-meta');
+    const price=row.querySelector('.material-price');
+    const stock=row.querySelector('.material-stock');
+    const text=(meta?.textContent||'')+' '+(price?.textContent||'');
+    const hasSize=/\b\d+(?:\.\d+)?\s*[x×X]\s*\d+(?:\.\d+)?\b/.test(text);
+    if(stock) stock.textContent=stock.textContent.replace(/(\d[\d,.]*)\s*枚\s*$/,'$1 単位不明');
+    if(price) price.textContent=price.textContent.replace(/\/\s*枚\b/,'/ 単位不明');
+    if(meta && !meta.querySelector('.unit-unknown-note')){
+      const note=document.createElement('div');
+      note.className='unit-unknown-note';
+      note.style.cssText='margin-top:3px;font-weight:700;color:#9a6700';
+      note.textContent=hasSize?'単位未確定（面積単価の可能性あり）':'単位未確定';
+      meta.appendChild(note);
+    }
+  });
+}
 function start(){
   if(!apply()){setTimeout(start,200);return;}
   ['mm_category','mm_material'].forEach(id=>{
@@ -89,10 +117,11 @@ function start(){
   const thicknessObserver=new MutationObserver(()=>apply());
   const t=document.getElementById('mm_thickness');if(t)thicknessObserver.observe(t,{childList:true});
   setupSupplier();
+  normalizeUnknownUnits();
   const list=document.getElementById('mList');
   if(list){
     let timer;
-    new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(()=>{refreshSupplierChoices();applySupplierFilter();},50)}).observe(list,{childList:true,subtree:true});
+    new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(()=>{refreshSupplierChoices();applySupplierFilter();normalizeUnknownUnits();},50)}).observe(list,{childList:true,subtree:true});
   }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
