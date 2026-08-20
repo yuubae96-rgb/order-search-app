@@ -9,7 +9,7 @@ window.alert=function(message){
  const matId=document.getElementById('mv_material')?.value;
  let unit='';
  try{const m=(window.materials||[]).find(x=>String(x.id)===String(matId));unit=m?.stock_unit||'';}catch(e){}
- if(!unit){const text=document.getElementById('mv_material')?.selectedOptions?.[0]?.textContent||'';const m=text.match(/\s(枚|巻|缶|kg|個)\）?$/);if(m)unit=m[1];}
+ if(!unit){const text=document.getElementById('mv_material')?.selectedOptions?.[0]?.textContent||'';const m=text.match(/\s(枚|巻|缶|kg|個|㎡)\）?$/);if(m)unit=m[1];}
  const isIn=type==='in';
  const word=isIn?'入庫':'出庫';
  const color=isIn?'#16794b':'#c62828';
@@ -21,4 +21,12 @@ window.alert=function(message){
  clearTimeout(window.__movementToastTimer);
  window.__movementToastTimer=setTimeout(()=>{el.style.display='none';},5000);
 };
+
+// 板材・フィルム・シール・ラミネートはメーカーを問わず㎡基準へ統一する。
+if(!document.querySelector('script[data-area-units]')){
+ const s=document.createElement('script');
+ s.dataset.areaUnits='1';
+ s.src='https://yuubae96-rgb.github.io/material-inventory-app/area-units.js?v=20260820-2030';
+ document.head.appendChild(s);
+}
 })();
