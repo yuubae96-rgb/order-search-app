@@ -63,3 +63,4 @@ loadCompanyModule('production-summary.js?v=20260819-0110');
 loadCompanyModule('materials-patch.js?v=20260819-0135');
 loadCompanyModule('material-auth-stop.js?v=20260821-0405');
 loadCompanyModule('material-unit-fix.js?v=20260821-0753');
+loadCompanyModule('material-delete.js?v=20260821-0802');
