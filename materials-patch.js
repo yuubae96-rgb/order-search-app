@@ -26,6 +26,57 @@ function apply(){
   }
   return true;
 }
+
+function supplierNames(){
+  const names=new Set();
+  document.querySelectorAll('#mList .material-meta').forEach(el=>{
+    const m=el.innerText.match(/仕入先\s+([^\n]+)/);
+    if(m&&m[1].trim())names.add(m[1].trim());
+  });
+  return [...names].sort((a,b)=>a.localeCompare(b,'ja'));
+}
+function refreshSupplierChoices(){
+  const names=supplierNames();
+  const filter=document.getElementById('mSupplierFilter');
+  if(filter){
+    const current=filter.value;
+    filter.innerHTML='<option value="">すべてのサプライヤー</option>'+names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+    if(names.includes(current))filter.value=current;
+  }
+  const dl=document.getElementById('mSupplierList');
+  if(dl)dl.innerHTML=names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}"></option>`).join('');
+}
+function applySupplierFilter(){
+  const filter=document.getElementById('mSupplierFilter');
+  if(!filter)return;
+  const supplier=filter.value;
+  document.querySelectorAll('#mList .material-list-item').forEach(row=>{
+    if(!supplier){row.style.display='';return;}
+    const meta=row.querySelector('.material-meta')?.innerText||'';
+    row.style.display=meta.includes('仕入先 '+supplier)?'':'none';
+  });
+}
+function setupSupplier(){
+  const search=document.getElementById('mSearch');
+  if(!search)return false;
+  if(!document.getElementById('mSupplierFilter')){
+    const field=document.createElement('div');
+    field.className='field';
+    field.style.marginTop='10px';
+    field.innerHTML='<label>サプライヤーで絞り込み</label><select id="mSupplierFilter"><option value="">すべてのサプライヤー</option></select>';
+    search.closest('.field')?.after(field);
+    field.querySelector('select').addEventListener('change',applySupplierFilter);
+  }
+  const supplier=document.getElementById('mm_supplier');
+  if(supplier&&!document.getElementById('mSupplierList')){
+    const dl=document.createElement('datalist');dl.id='mSupplierList';document.body.appendChild(dl);
+    supplier.setAttribute('list','mSupplierList');
+    supplier.setAttribute('placeholder','登録済みから選択、または新規入力');
+  }
+  refreshSupplierChoices();
+  applySupplierFilter();
+  return true;
+}
 function start(){
   if(!apply()){setTimeout(start,200);return;}
   ['mm_category','mm_material'].forEach(id=>{
@@ -35,8 +86,14 @@ function start(){
       el.addEventListener('change',()=>setTimeout(apply,0));
     }
   });
-  const observer=new MutationObserver(()=>apply());
-  const t=document.getElementById('mm_thickness');if(t)observer.observe(t,{childList:true});
+  const thicknessObserver=new MutationObserver(()=>apply());
+  const t=document.getElementById('mm_thickness');if(t)thicknessObserver.observe(t,{childList:true});
+  setupSupplier();
+  const list=document.getElementById('mList');
+  if(list){
+    let timer;
+    new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(()=>{refreshSupplierChoices();applySupplierFilter();},50)}).observe(list,{childList:true,subtree:true});
+  }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
