@@ -44,7 +44,7 @@
     <div class="plate-badge">見</div>
     <div class="topbar-titles">
       <div class="brand">HOTMILK QUOTE PLATE</div>
-      <div class="screen-name" id="screenTitle">見積もり登録</div>
+      <div class="screen-name" id="screenTitle">見積もりノート</div>
     </div>
   </div>
 </div>
@@ -150,5 +150,16 @@
 <script src="app.js?v=20260818-2358"></script>
 <script src="materials-inline.js?v=20260818-2358"></script>
 <script src="quote-material-link.js?v=20260818-2358"></script>
+<script>
+(() => {
+  const title = document.getElementById('screenTitle');
+  if (!title) return;
+  const keepRegisterName = () => {
+    if (title.textContent === '見積もり登録') title.textContent = '見積もりノート';
+  };
+  keepRegisterName();
+  new MutationObserver(keepRegisterName).observe(title, { childList: true, characterData: true, subtree: true });
+})();
+</script>
 </body>
 </html>
