@@ -22,13 +22,49 @@ function attach(select){
     busy=true;setTimeout(()=>{fixSelect(select);busy=false;},0);
   }).observe(select,{childList:true});
 }
+let materialUnits=new Map();
+async function loadMaterialUnits(){
+  if(!window.supabaseClient)return;
+  try{
+    const {data,error}=await window.supabaseClient.from('materials').select('id,category,stock_unit');
+    if(error)return;
+    materialUnits=new Map((data||[]).map(m=>[String(m.id),m.category==='シール・ラベル'?'㎡':(m.stock_unit||'')]));
+    fixInventoryDisplay();
+  }catch(_e){}
+}
+function fixInventoryDisplay(){
+  document.querySelectorAll('#miList .mi-item').forEach(row=>{
+    const btn=row.querySelector('.mi-delete-btn[data-id]');
+    if(!btn)return;
+    const unit=materialUnits.get(String(btn.dataset.id));
+    if(!unit)return;
+    const stock=row.querySelector('.mi-stock');
+    if(stock)stock.textContent=stock.textContent.replace(/\s*(枚|巻|缶|kg|個|㎡)\s*$/,' '+unit);
+    const meta=row.querySelector('.mi-meta');
+    if(meta&&/最新単価\s*[\d,]+円/.test(meta.textContent)){
+      const nodes=[...meta.childNodes];
+      nodes.forEach(n=>{
+        if(n.nodeType===Node.TEXT_NODE&&/最新単価\s*[\d,]+円/.test(n.textContent)){
+          n.textContent=n.textContent.replace(/(最新単価\s*[\d,]+円)(?:\s*\/\s*(?:枚|巻|缶|kg|個|㎡))?(\s*\()/,'$1 / '+unit+'$2');
+        }
+      });
+    }
+  });
+}
 function apply(){
   attach(document.getElementById('miUnit'));
   attach(document.getElementById('mm_stock_unit'));
+  fixInventoryDisplay();
 }
 function start(){
   apply();
-  new MutationObserver(apply).observe(document.documentElement,{childList:true,subtree:true});
+  loadMaterialUnits();
+  let timer=null;
+  new MutationObserver(()=>{
+    apply();
+    clearTimeout(timer);
+    timer=setTimeout(loadMaterialUnits,100);
+  }).observe(document.documentElement,{childList:true,subtree:true});
   document.addEventListener('change',e=>{
     if(['miCat','miMat','mm_category','mm_material'].includes(e.target?.id))setTimeout(apply,0);
   },true);
