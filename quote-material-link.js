@@ -4,7 +4,8 @@ let QUOTE_MATERIALS=[];
 let QUOTE_MATERIAL_PRICES=[];
 let QUOTE_MATERIAL_SNAPSHOT=null;
 let QUOTE_MATERIAL_LOAD_TIMER=null;
-let QUOTE_MATERIAL_AUTH_RECOVERY=false;
+let QUOTE_MATERIAL_LOAD_PROMISE=null;
+let QUOTE_MATERIAL_AUTH_EVENT_TIMER=null;
 
 function qNum(v){const n=Number(v);return Number.isFinite(n)?n:0;}
 function uniq(arr){return [...new Set(arr.filter(v=>v!==null&&v!==undefined&&String(v)!=='' ).map(v=>String(v)))];}
@@ -26,15 +27,64 @@ function onSizeChange(){const name=document.getElementById('f_materialName').val
 function renderMaterialPicker(){setOptions('f_materialName',uniq(QUOTE_MATERIALS.map(m=>m.name)).sort((a,b)=>a.localeCompare(b,'ja')),'材質を選択');resetBelow('f_materialSpec');const info=document.getElementById('materialMasterInfo');if(!QUOTE_MATERIALS.length&&info)info.innerHTML='材料マスターはまだ0件です。材料・在庫で登録すると、ここから選べるようになります。';else if(info)info.innerHTML='「材質 → 規格 → 板厚 → サイズ」の順に選んでください。';}
 
 function isAuthError(err){return!!err&&(err.status===401||err.code==='PGRST301'||/jwt|token|unauthorized/i.test(String(err.message||'')));}
-async function recoverMaterialAuth(){if(QUOTE_MATERIAL_AUTH_RECOVERY)return false;QUOTE_MATERIAL_AUTH_RECOVERY=true;try{const{data,error}=await supabaseClient.auth.refreshSession();if(!error&&data?.session)return true;await supabaseClient.auth.signOut({scope:'local'}).catch(()=>{});if(typeof showAuthGate==='function')showAuthGate('ログイン情報を更新するため、もう一度ログインしてください。');return false;}finally{QUOTE_MATERIAL_AUTH_RECOVERY=false;}}
-async function loadQuoteMaterials(retryAuth=true){const nameEl=document.getElementById('f_materialName');if(!nameEl||!window.supabaseClient)return;if(QUOTE_MATERIAL_LOAD_TIMER){clearTimeout(QUOTE_MATERIAL_LOAD_TIMER);QUOTE_MATERIAL_LOAD_TIMER=null;}nameEl.innerHTML='<option value="">材料マスターを読み込み中...</option>';nameEl.disabled=true;try{const[mr,pr]=await Promise.all([supabaseClient.from('materials').select('*').eq('active',true).order('name').order('spec').order('thickness_mm'),supabaseClient.from('material_prices').select('*').order('effective_from',{ascending:false})]);if(mr.error||pr.error){const err=mr.error||pr.error;console.error('材料マスター読込エラー',err);if(retryAuth&&isAuthError(err)){const recovered=await recoverMaterialAuth();if(recovered)return loadQuoteMaterials(false);}nameEl.innerHTML='<option value="">材料マスターの読込に失敗しました</option>';return;}QUOTE_MATERIALS=mr.data||[];QUOTE_MATERIAL_PRICES=pr.data||[];renderMaterialPicker();}catch(err){console.error('材料マスター読込例外',err);nameEl.innerHTML='<option value="">材料マスターを再読み込み中...</option>';QUOTE_MATERIAL_LOAD_TIMER=setTimeout(()=>loadQuoteMaterials(true),1000);}}
+function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+async function queryQuoteMaterials(){return Promise.all([supabaseClient.from('materials').select('*').eq('active',true).order('name').order('spec').order('thickness_mm'),supabaseClient.from('material_prices').select('*').order('effective_from',{ascending:false})]);}
+async function loadQuoteMaterials(force=false){
+  const nameEl=document.getElementById('f_materialName');
+  if(!nameEl||!window.supabaseClient)return;
+  if(QUOTE_MATERIAL_LOAD_PROMISE)return QUOTE_MATERIAL_LOAD_PROMISE;
+  if(!force&&QUOTE_MATERIALS.length)return;
+
+  QUOTE_MATERIAL_LOAD_PROMISE=(async()=>{
+    if(QUOTE_MATERIAL_LOAD_TIMER){clearTimeout(QUOTE_MATERIAL_LOAD_TIMER);QUOTE_MATERIAL_LOAD_TIMER=null;}
+    const {data:{session}}=await supabaseClient.auth.getSession();
+    if(!session){nameEl.innerHTML='<option value="">ログイン後に材料を読み込みます</option>';nameEl.disabled=true;return;}
+
+    nameEl.innerHTML='<option value="">材料マスターを読み込み中...</option>';
+    nameEl.disabled=true;
+
+    try{
+      let [mr,pr]=await queryQuoteMaterials();
+      let err=mr.error||pr.error;
+
+      if(err&&isAuthError(err)&&typeof window.getFreshSupabaseAccessToken==='function'){
+        await window.getFreshSupabaseAccessToken();
+        await delay(200);
+        [mr,pr]=await queryQuoteMaterials();
+        err=mr.error||pr.error;
+      }
+
+      if(err){
+        console.error('材料マスター読込エラー',err);
+        nameEl.innerHTML='<option value="">材料マスターを再読み込みします</option>';
+        QUOTE_MATERIAL_LOAD_TIMER=setTimeout(()=>loadQuoteMaterials(true),1200);
+        return;
+      }
+
+      QUOTE_MATERIALS=mr.data||[];
+      QUOTE_MATERIAL_PRICES=pr.data||[];
+      renderMaterialPicker();
+    }catch(err){
+      console.error('材料マスター読込例外',err);
+      nameEl.innerHTML='<option value="">材料マスターを再読み込みします</option>';
+      QUOTE_MATERIAL_LOAD_TIMER=setTimeout(()=>loadQuoteMaterials(true),1200);
+    }
+  })().finally(()=>{QUOTE_MATERIAL_LOAD_PROMISE=null;});
+
+  return QUOTE_MATERIAL_LOAD_PROMISE;
+}
 
 async function saveQuoteMaterialSnapshot(id){if(!QUOTE_MATERIAL_SNAPSHOT||!id)return;const s=QUOTE_MATERIAL_SNAPSHOT;const{error}=await supabaseClient.from('estimates').update({material_id:s.materialId,material_price_id:s.priceId,material_unit_price_snapshot:s.unitPrice,material_cost_snapshot:s.estimatedCost}).eq('id',Number(id));if(error)console.error('材料単価スナップショット保存エラー',error);}
-function installQuoteMaterialIntegration(){const old=document.getElementById('f_material');if(!old||document.getElementById('f_materialPicker'))return;const row=old.closest('.row2');if(!row)return;const box=document.createElement('div');box.className='field';box.id='f_materialPicker';box.style.marginBottom='12px';box.innerHTML=`<label>材料マスターから選択<span class="opt">推奨</span></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="f_materialName"><option value="">読み込み中...</option></select><select id="f_materialSpec" disabled><option value="">規格を選択</option></select><select id="f_materialThickness" disabled><option value="">板厚を選択</option></select><select id="f_materialSize" disabled><option value="">サイズを選択</option></select></div><input type="hidden" id="f_materialMaster"><div id="materialMasterInfo" style="font-size:12px;line-height:1.65;margin-top:7px;opacity:.78;">材料マスターを読み込んでいます。</div>`;row.parentNode.insertBefore(box,row);document.getElementById('f_materialName').addEventListener('change',onNameChange);document.getElementById('f_materialSpec').addEventListener('change',onSpecChange);document.getElementById('f_materialThickness').addEventListener('change',onThicknessChange);document.getElementById('f_materialSize').addEventListener('change',onSizeChange);['f_sizeV','f_sizeH','f_quantity'].forEach(id=>document.getElementById(id)?.addEventListener('input',calculateQuoteMaterialSnapshot));if(typeof StorageAPI!=='undefined'&&!StorageAPI.__materialLinked){const add=StorageAPI.add.bind(StorageAPI);StorageAPI.add=async function(o){const saved=await add(o);await saveQuoteMaterialSnapshot(saved&&saved.id);return saved;};const upd=StorageAPI.update.bind(StorageAPI);StorageAPI.update=async function(id,p,e){const r=await upd(id,p,e);if(r&&!r.conflict)await saveQuoteMaterialSnapshot(id);return r;};StorageAPI.__materialLinked=true;}loadQuoteMaterials();}
+function installQuoteMaterialIntegration(){const old=document.getElementById('f_material');if(!old||document.getElementById('f_materialPicker'))return;const row=old.closest('.row2');if(!row)return;const box=document.createElement('div');box.className='field';box.id='f_materialPicker';box.style.marginBottom='12px';box.innerHTML=`<label>材料マスターから選択<span class="opt">推奨</span></label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="f_materialName"><option value="">読み込み中...</option></select><select id="f_materialSpec" disabled><option value="">規格を選択</option></select><select id="f_materialThickness" disabled><option value="">板厚を選択</option></select><select id="f_materialSize" disabled><option value="">サイズを選択</option></select></div><input type="hidden" id="f_materialMaster"><div id="materialMasterInfo" style="font-size:12px;line-height:1.65;margin-top:7px;opacity:.78;">材料マスターを読み込んでいます。</div>`;row.parentNode.insertBefore(box,row);document.getElementById('f_materialName').addEventListener('change',onNameChange);document.getElementById('f_materialSpec').addEventListener('change',onSpecChange);document.getElementById('f_materialThickness').addEventListener('change',onThicknessChange);document.getElementById('f_materialSize').addEventListener('change',onSizeChange);['f_sizeV','f_sizeH','f_quantity'].forEach(id=>document.getElementById(id)?.addEventListener('input',calculateQuoteMaterialSnapshot));if(typeof StorageAPI!=='undefined'&&!StorageAPI.__materialLinked){const add=StorageAPI.add.bind(StorageAPI);StorageAPI.add=async function(o){const saved=await add(o);await saveQuoteMaterialSnapshot(saved&&saved.id);return saved;};const upd=StorageAPI.update.bind(StorageAPI);StorageAPI.update=async function(id,p,e){const r=await upd(id,p,e);if(r&&!r.conflict)await saveQuoteMaterialSnapshot(id);return r;};StorageAPI.__materialLinked=true;}setTimeout(()=>loadQuoteMaterials(false),350);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installQuoteMaterialIntegration);else setTimeout(installQuoteMaterialIntegration,0);
-supabaseClient.auth.onAuthStateChange((_e,s)=>{if(s)setTimeout(()=>loadQuoteMaterials(true),50);});
-window.addEventListener('pageshow',()=>setTimeout(()=>loadQuoteMaterials(true),100));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>loadQuoteMaterials(true),100);});
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+  if(!session)return;
+  if(event==='TOKEN_REFRESHED')return;
+  clearTimeout(QUOTE_MATERIAL_AUTH_EVENT_TIMER);
+  QUOTE_MATERIAL_AUTH_EVENT_TIMER=setTimeout(()=>loadQuoteMaterials(true),350);
+});
+window.addEventListener('pageshow',()=>{if(!QUOTE_MATERIALS.length)setTimeout(()=>loadQuoteMaterials(false),350);});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!QUOTE_MATERIALS.length)setTimeout(()=>loadQuoteMaterials(false),350);});
 
 function reorderQuoteFormFields(){
   const form=document.getElementById('orderForm');
