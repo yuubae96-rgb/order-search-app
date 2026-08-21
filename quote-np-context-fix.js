@@ -36,7 +36,9 @@
     const company=document.getElementById('f_company')?.closest('.field');
     const item=document.getElementById('f_itemName')?.closest('.field');
     const due=document.getElementById('f_dueDate')?.closest('.field');
-    if(!form||!card||!date||!staff||!company||!item||!due)return false;
+    const specGrid=document.querySelector('#orderForm .quote-spec-grid');
+    const materialOther=document.getElementById('materialOtherField');
+    if(!form||!card||!date||!staff||!company||!item||!due||!specGrid)return false;
     applying=true;
     try{
       let grid=document.getElementById('quoteNpContextGrid');
@@ -49,12 +51,23 @@
         else card.insertBefore(grid,card.firstChild?.nextSibling||null);
       }
 
-      // 1行目：見積日｜担当者、2行目：客先名（全幅）、3行目：NP番号他（全幅）
       [date,staff,company,item].forEach(field=>{if(field.parentElement!==grid)grid.appendChild(field);});
       date.className='field np-date-field';
       staff.className='field np-staff-field';
       company.className='field np-company-field';
       item.className='field np-item-field';
+
+      // NP番号他の直下へ、材質・板厚・縦・横をまとめて移動
+      specGrid.classList.add('np-spec-grid');
+      if(specGrid.parentElement!==card || specGrid.previousElementSibling!==grid){
+        grid.insertAdjacentElement('afterend',specGrid);
+      }
+      // 「その他」材質を選んだ時の自由入力欄も仕様欄の直下へ追従
+      if(materialOther && materialOther.parentElement!==card){
+        specGrid.insertAdjacentElement('afterend',materialOther);
+      } else if(materialOther && materialOther.previousElementSibling!==specGrid){
+        specGrid.insertAdjacentElement('afterend',materialOther);
+      }
 
       if(card.contains(due)) card.insertAdjacentElement('beforebegin',due);
       due.classList.add('np-due-field');
@@ -73,7 +86,7 @@
       const title=card.querySelector('.quote-v2-title');
       if(title)title.textContent='数量別のNP単価';
       const sub=card.querySelector('.quote-v2-sub');
-      if(sub)sub.textContent='見積日・担当者・客先・NP番号と、数量別単価をまとめて残します。';
+      if(sub)sub.textContent='見積日・担当者・客先・NP番号・仕様と、数量別単価をまとめて残します。';
       return true;
     }finally{applying=false;}
   }
