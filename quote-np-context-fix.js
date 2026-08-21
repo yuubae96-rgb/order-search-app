@@ -1,6 +1,32 @@
 'use strict';
 (function(){
   let applying=false;
+
+  function ensureCalendarButton(dateField){
+    const input=dateField.querySelector('#f_orderDate');
+    if(!input)return;
+    input.type='date';
+    let wrap=dateField.querySelector('.np-date-wrap');
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.className='np-date-wrap';
+      input.parentNode.insertBefore(wrap,input);
+      wrap.appendChild(input);
+    }
+    if(!wrap.querySelector('.np-calendar-btn')){
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='np-calendar-btn';
+      btn.setAttribute('aria-label','カレンダーから見積日を選ぶ');
+      btn.textContent='📅';
+      btn.addEventListener('click',()=>{
+        try{ if(typeof input.showPicker==='function') input.showPicker(); else { input.focus(); input.click(); } }
+        catch(e){ input.focus(); input.click(); }
+      });
+      wrap.appendChild(btn);
+    }
+  }
+
   function apply(){
     if(applying)return false;
     const form=document.getElementById('orderForm');
@@ -23,35 +49,35 @@
         else card.insertBefore(grid,card.firstChild?.nextSibling||null);
       }
 
-      // カード内：見積日｜客先名 / 担当者 / NP番号他（全幅）
-      [date,company,staff,item].forEach(field=>{if(field.parentElement!==grid)grid.appendChild(field);});
-      date.classList.add('np-date-field');
-      company.classList.add('np-company-field');
-      staff.classList.add('np-staff-field');
-      item.classList.add('np-item-field');
+      // 1行目：見積日｜担当者、2行目：客先名（全幅）、3行目：NP番号他（全幅）
+      [date,staff,company,item].forEach(field=>{if(field.parentElement!==grid)grid.appendChild(field);});
+      date.className='field np-date-field';
+      staff.className='field np-staff-field';
+      company.className='field np-company-field';
+      item.className='field np-item-field';
 
-      // 納期は数量別NP単価カードの外へ戻す
-      if(card.contains(due)){
-        card.insertAdjacentElement('beforebegin',due);
-      }
+      if(card.contains(due)) card.insertAdjacentElement('beforebegin',due);
       due.classList.add('np-due-field');
 
       const dateLabel=date.querySelector('label');
       if(dateLabel)dateLabel.innerHTML='見積日<span class="req">必須</span>';
+      const staffLabel=staff.querySelector('label');
+      if(staffLabel)staffLabel.textContent='担当者';
       const companyLabel=company.querySelector('label');
       if(companyLabel)companyLabel.innerHTML='客先名<span class="req">必須</span>';
       const itemLabel=item.querySelector('label');
       if(itemLabel)itemLabel.textContent='NP番号他';
-      const staffLabel=staff.querySelector('label');
-      if(staffLabel)staffLabel.textContent='担当者';
+
+      ensureCalendarButton(date);
 
       const title=card.querySelector('.quote-v2-title');
       if(title)title.textContent='数量別のNP単価';
       const sub=card.querySelector('.quote-v2-sub');
-      if(sub)sub.textContent='見積日・客先・担当者・NP番号と、数量別単価をまとめて残します。';
+      if(sub)sub.textContent='見積日・担当者・客先・NP番号と、数量別単価をまとめて残します。';
       return true;
     }finally{applying=false;}
   }
+
   function start(){
     apply();
     [100,300,600,1000,1600].forEach(ms=>setTimeout(apply,ms));
