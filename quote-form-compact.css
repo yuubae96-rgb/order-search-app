@@ -1,0 +1,12 @@
+/* 見積上部を2列中心にして縦スクロールを短縮 */
+#orderForm .quote-top-grid,
+#orderForm .quote-outsource-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:12px;
+}
+#orderForm .quote-top-grid .field,
+#orderForm .quote-outsource-grid .field{min-width:0;margin-bottom:14px}
+#orderForm .quote-top-grid input,
+#orderForm .quote-top-grid select,
+#orderForm .quote-outsource-grid input{width:100%;min-width:0;box-sizing:border-box}
