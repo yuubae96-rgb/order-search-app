@@ -49,4 +49,12 @@ if(!document.querySelector('script[data-area-units]')){
  s.src='https://yuubae96-rgb.github.io/material-inventory-app/area-units.js?v=20260820-2030';
  document.head.appendChild(s);
 }
+
+// 納品書AIで似た材料を見つけたとき、勝手に統合せずユーザーへ確認する。
+if(!document.querySelector('script[data-material-similarity-review]')){
+ const s=document.createElement('script');
+ s.dataset.materialSimilarityReview='1';
+ s.src='https://yuubae96-rgb.github.io/order-search-app/material-similarity-review.js?v=20260821-1430';
+ document.head.appendChild(s);
+}
 })();
