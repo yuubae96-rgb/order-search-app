@@ -46,5 +46,5 @@ setTimeout(enableFastTabs,300);setTimeout(enableFastTabs,1000);setTimeout(enable
 
 if(!document.querySelector('script[data-area-units]')){const s=document.createElement('script');s.dataset.areaUnits='1';s.src='https://yuubae96-rgb.github.io/material-inventory-app/area-units.js?v=20260821-1841';document.head.appendChild(s)}
 if(!document.querySelector('script[data-material-similarity-review]')){const s=document.createElement('script');s.dataset.materialSimilarityReview='1';s.src='https://yuubae96-rgb.github.io/order-search-app/material-similarity-review.js?v=20260821-1430';document.head.appendChild(s)}
-if(!document.querySelector('script[data-material-duplicate-review]')){const s=document.createElement('script');s.dataset.materialDuplicateReview='1';s.src='https://yuubae96-rgb.github.io/order-search-app/material-duplicate-review.js?v=20260821-1905';document.head.appendChild(s)}
+if(!document.querySelector('script[data-material-duplicate-review]')){const s=document.createElement('script');s.dataset.materialDuplicateReview='1';s.src='https://yuubae96-rgb.github.io/material-inventory-app/duplicate-review.js?v=20260821-1915';document.head.appendChild(s)}
 })();
