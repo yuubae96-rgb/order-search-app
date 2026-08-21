@@ -42,9 +42,9 @@ window.alert=function(message){
 function switchTabNow(button){if(!button?.dataset?.tab)return;const panel=document.getElementById('mp-'+button.dataset.tab);if(!panel)return;document.querySelectorAll('.material-tab').forEach(x=>x.classList.toggle('active',x===button));document.querySelectorAll('.material-panel').forEach(x=>x.classList.toggle('active',x===panel))}
 function enableFastTabs(){document.querySelectorAll('.material-tab').forEach(button=>{button.style.touchAction='manipulation';button.style.webkitTapHighlightColor='transparent';if(button.dataset.fastTab==='1')return;button.dataset.fastTab='1';button.addEventListener('pointerdown',()=>switchTabNow(button),{passive:true})})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enableFastTabs,{once:true});else enableFastTabs();
-// documentElement全体の常時監視はやめ、タブが後から追加される納品書・棚卸し用に短時間だけ確認する。
 setTimeout(enableFastTabs,300);setTimeout(enableFastTabs,1000);setTimeout(enableFastTabs,2500);
 
 if(!document.querySelector('script[data-area-units]')){const s=document.createElement('script');s.dataset.areaUnits='1';s.src='https://yuubae96-rgb.github.io/material-inventory-app/area-units.js?v=20260821-1841';document.head.appendChild(s)}
 if(!document.querySelector('script[data-material-similarity-review]')){const s=document.createElement('script');s.dataset.materialSimilarityReview='1';s.src='https://yuubae96-rgb.github.io/order-search-app/material-similarity-review.js?v=20260821-1430';document.head.appendChild(s)}
+if(!document.querySelector('script[data-material-duplicate-review]')){const s=document.createElement('script');s.dataset.materialDuplicateReview='1';s.src='https://yuubae96-rgb.github.io/order-search-app/material-duplicate-review.js?v=20260821-1905';document.head.appendChild(s)}
 })();
