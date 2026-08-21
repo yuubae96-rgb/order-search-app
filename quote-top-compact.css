@@ -1,0 +1,15 @@
+/* 見積もり日・担当者・会社名・納期をiPhoneでも2行2列に固定 */
+#orderForm .quote-top-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:12px;
+}
+#orderForm .quote-top-grid .field{
+  min-width:0;
+  margin-bottom:14px;
+}
+#orderForm .quote-top-grid input,
+#orderForm .quote-top-grid select{
+  width:100%;
+  min-width:0;
+}
