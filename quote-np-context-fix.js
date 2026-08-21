@@ -3,12 +3,14 @@
   let applying=false;
   function apply(){
     if(applying)return false;
+    const form=document.getElementById('orderForm');
     const card=document.getElementById('quoteV2');
     const date=document.getElementById('f_orderDate')?.closest('.field');
     const staff=document.getElementById('f_staff')?.closest('.field');
     const company=document.getElementById('f_company')?.closest('.field');
     const item=document.getElementById('f_itemName')?.closest('.field');
-    if(!card||!date||!staff||!company||!item)return false;
+    const due=document.getElementById('f_dueDate')?.closest('.field');
+    if(!form||!card||!date||!staff||!company||!item||!due)return false;
     applying=true;
     try{
       let grid=document.getElementById('quoteNpContextGrid');
@@ -20,7 +22,19 @@
         if(sub) sub.insertAdjacentElement('afterend',grid);
         else card.insertBefore(grid,card.firstChild?.nextSibling||null);
       }
-      [date,staff,company,item].forEach(field=>{if(field.parentElement!==grid)grid.appendChild(field);});
+
+      // カード内：見積日｜客先名 / 担当者 / NP番号他（全幅）
+      [date,company,staff,item].forEach(field=>{if(field.parentElement!==grid)grid.appendChild(field);});
+      date.classList.add('np-date-field');
+      company.classList.add('np-company-field');
+      staff.classList.add('np-staff-field');
+      item.classList.add('np-item-field');
+
+      // 納期は数量別NP単価カードの外へ戻す
+      if(card.contains(due)){
+        card.insertAdjacentElement('beforebegin',due);
+      }
+      due.classList.add('np-due-field');
 
       const dateLabel=date.querySelector('label');
       if(dateLabel)dateLabel.innerHTML='見積日<span class="req">必須</span>';
@@ -34,7 +48,7 @@
       const title=card.querySelector('.quote-v2-title');
       if(title)title.textContent='数量別のNP単価';
       const sub=card.querySelector('.quote-v2-sub');
-      if(sub)sub.textContent='見積日・担当者・客先・NP番号と、数量別単価をまとめて残します。';
+      if(sub)sub.textContent='見積日・客先・担当者・NP番号と、数量別単価をまとめて残します。';
       return true;
     }finally{applying=false;}
   }
