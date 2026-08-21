@@ -22,6 +22,26 @@ window.alert=function(message){
  window.__movementToastTimer=setTimeout(()=>{el.style.display='none';},5000);
 };
 
+// タブは通信や再描画を待たず、指を置いた瞬間に表示だけ先に切り替える。
+function switchTabNow(button){
+ if(!button?.dataset?.tab)return;
+ const panel=document.getElementById('mp-'+button.dataset.tab);
+ if(!panel)return;
+ document.querySelectorAll('.material-tab').forEach(x=>x.classList.toggle('active',x===button));
+ document.querySelectorAll('.material-panel').forEach(x=>x.classList.toggle('active',x===panel));
+}
+function enableFastTabs(){
+ document.querySelectorAll('.material-tab').forEach(button=>{
+   button.style.touchAction='manipulation';
+   button.style.webkitTapHighlightColor='transparent';
+   if(button.dataset.fastTab==='1')return;
+   button.dataset.fastTab='1';
+   button.addEventListener('pointerdown',()=>switchTabNow(button),{passive:true});
+ });
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enableFastTabs);else enableFastTabs();
+new MutationObserver(enableFastTabs).observe(document.documentElement,{childList:true,subtree:true});
+
 // 板材・フィルム・シール・ラミネートはメーカーを問わず㎡基準へ統一する。
 if(!document.querySelector('script[data-area-units]')){
  const s=document.createElement('script');
