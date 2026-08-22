@@ -1,1 +1,140 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1c2024"><title>見積詳細</title><style>:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#17212b;background:#f4f6f8}*{box-sizing:border-box}body{margin:0}.wrap{max-width:820px;margin:auto;padding:14px}.card{background:#fff;border:1px solid #dce3e8;border-radius:16px;padding:16px;margin:12px 0}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800;font-size:15px}.green{background:#18794e;color:#fff}.gray{background:#e9eef2;color:#24323d}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.field{margin:9px 0;min-width:0}.field.full,.section{grid-column:1/-1}.field label{display:block;font-size:12px;font-weight:800;color:#5b6873;margin-bottom:5px}input,textarea,select{width:100%;padding:11px;border:1px solid #cfd8df;border-radius:10px;font-size:16px;background:#fff}textarea{min-height:80px}.section{font-weight:900;margin:16px 0 4px;padding-top:12px;border-top:1px solid #e5eaee}.priceRow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:7px;margin:7px 0}.remove{border:0;border-radius:8px;background:#fde2e0;color:#9d2018;font-weight:800}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.loading{padding:30px;text-align:center;font-weight:900}.error{background:#fff0ef;border:1px solid #f0b9b4;padding:12px;border-radius:10px;color:#8a241b}@media(max-width:620px){.wrap{padding:10px}.grid{grid-template-columns:1fr 1fr;gap:0 8px}.priceRow{grid-template-columns:1fr 1fr 1fr}.priceRow .remove{grid-column:1/-1;padding:8px}}</style></head><body><div class="wrap"><div class="top"><h1 style="font-size:23px;margin:6px 0">見積詳細・編集</h1><button class="btn gray" onclick="history.back()">保管庫へ戻る</button></div><div id="loading" class="card loading">読み込み中…</div><div id="error" class="card error" style="display:none"></div><div id="card" class="card" style="display:none"><div id="body"></div><div class="actions"><button id="saveBtn" class="btn green">変更を保存</button><button class="btn gray" onclick="history.back()">キャンセル</button></div></div></div><script>const FN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-ai';const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));let id=Number(new URLSearchParams(location.search).get('id'));async function api(b){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(FN,{method:'POST',signal:c.signal,headers:{'content-type':'application/json'},body:JSON.stringify(b)});const j=await r.json();if(!r.ok)throw Error(j.error||'処理に失敗しました');return j}catch(e){if(e.name==='AbortError')throw Error('読み込みに時間がかかりすぎました。もう一度お試しください');throw e}finally{clearTimeout(t)}}function f(k,label,v,type='text',full=false){return '<div class="field '+(full?'full':'')+'"><label>'+label+'</label>'+(type==='textarea'?'<textarea id="f_'+k+'">'+esc(v??'')+'</textarea>':'<input id="f_'+k+'" type="'+type+'" value="'+esc(v??'')+'"></div>'}function addPrice(p={}){const d=document.createElement('div');d.className='priceRow';d.innerHTML='<input class="q" type="number" placeholder="数量" value="'+esc(p.quantity??'')+'"><input class="u" type="number" placeholder="単価" value="'+esc(p.unit_price??'')+'"><input class="a" type="number" placeholder="金額" value="'+esc(p.amount??'')+'"><button class="remove" onclick="this.parentElement.remove()">行削除</button>';$('prices').appendChild(d)}async function load(){try{if(!id)throw Error('案件IDがありません');const j=await api({action:'get',id}),x=j.item,prices=(x.estimate_notebook2_prices||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));$('body').innerHTML='<div class="grid">'+f('company_name','会社名',x.company_name,'text',true)+f('product_name','図番・製品名',x.product_name,'text',true)+f('customer_department','客先部署',x.customer_department)+f('customer_name','客先名',x.customer_name)+f('material','材質',x.material)+f('thickness','板厚',x.thickness)+f('width','横サイズ',x.width,'number')+f('height','縦サイズ',x.height,'number')+f('color_text','色',x.color_text)+f('manufacturing_method','製作方法',x.manufacturing_method)+f('delivery_text','納期',x.delivery_text)+f('person_in_charge','担当者',x.person_in_charge)+'<div class="section">数量別単価</div><div class="field full"><div id="prices"></div><button class="btn gray" onclick="addPrice()">＋ 数量行を追加</button></div>'+f('plate_fee','原版代',x.plate_fee,'number')+f('notes','備考',x.notes,'textarea',true)+'<div class="section">受注・失注結果</div><div class="field"><label>結果</label><select id="status"><option '+((x.status||'回答待ち')==='回答待ち'?'selected':'')+'>回答待ち</option><option '+(x.status==='受注'?'selected':'')+'>受注</option><option '+(x.status==='失注'?'selected':'')+'>失注</option></select></div>'+f('result_date','結果日',x.result_date||'','date')+f('won_quantity','受注数量',x.won_quantity,'number')+f('won_unit_price','受注単価',x.won_unit_price,'number')+f('lost_reason','失注理由',x.lost_reason,'text',true)+f('result_note','理由・結果メモ',x.result_note,'textarea',true)+'</div>';prices.forEach(addPrice);if(!prices.length)addPrice({});$('loading').style.display='none';$('card').style.display='block'}catch(e){$('loading').style.display='none';$('error').style.display='block';$('error').textContent=e.message}}$('saveBtn').onclick=async()=>{const get=k=>$('f_'+k)?.value??'';const item={company_name:get('company_name'),product_name:get('product_name'),customer_department:get('customer_department'),customer_name:get('customer_name'),material:get('material'),thickness:get('thickness'),width:get('width'),height:get('height'),color_text:get('color_text'),manufacturing_method:get('manufacturing_method'),delivery_text:get('delivery_text'),person_in_charge:get('person_in_charge'),plate_fee:get('plate_fee'),notes:get('notes'),status:$('status').value,result_date:get('result_date'),won_quantity:get('won_quantity'),won_unit_price:get('won_unit_price'),lost_reason:get('lost_reason'),result_note:get('result_note'),prices:[...document.querySelectorAll('.priceRow')].map(r=>({quantity:r.querySelector('.q').value||null,unit_price:r.querySelector('.u').value||null,amount:r.querySelector('.a').value||null}))};try{$('saveBtn').disabled=true;$('saveBtn').textContent='保存中…';await api({action:'update',id,item});alert('変更を保存しました');history.back()}catch(e){alert(e.message)}finally{$('saveBtn').disabled=false;$('saveBtn').textContent='変更を保存'}};load();</script></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1c2024">
+<title>見積詳細・編集</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#17212b;background:#f4f6f8}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:820px;margin:auto;padding:14px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.card{background:#fff;border:1px solid #dce3e8;border-radius:16px;padding:16px;margin:12px 0}.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800;font-size:15px}.green{background:#18794e;color:#fff}.gray{background:#e9eef2;color:#24323d}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.field{margin:9px 0;min-width:0}.field.full,.section{grid-column:1/-1}.field label{display:block;font-size:12px;font-weight:800;color:#5b6873;margin-bottom:5px}input,textarea,select{width:100%;padding:11px;border:1px solid #cfd8df;border-radius:10px;font-size:16px;background:#fff}textarea{min-height:80px}.section{font-weight:900;margin:16px 0 4px;padding-top:12px;border-top:1px solid #e5eaee}.priceRow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:7px;margin:7px 0}.remove{border:0;border-radius:8px;background:#fde2e0;color:#9d2018;font-weight:800;padding:8px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.loading{text-align:center;font-weight:900}.error{background:#fff0ef;border:1px solid #f0b9b4;color:#8a241b}.hidden{display:none!important}@media(max-width:620px){.wrap{padding:10px}.grid{grid-template-columns:1fr 1fr;gap:0 8px}.priceRow{grid-template-columns:1fr 1fr 1fr}.priceRow .remove{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1 style="font-size:23px;margin:6px 0">見積詳細・編集</h1>
+    <button class="btn gray" id="backBtn">保管庫へ戻る</button>
+  </div>
+  <div id="loading" class="card loading">読み込み中…</div>
+  <div id="error" class="card error hidden"></div>
+  <div id="card" class="card hidden">
+    <div id="formArea" class="grid"></div>
+    <div class="actions">
+      <button id="saveBtn" class="btn green">変更を保存</button>
+      <button class="btn gray" id="cancelBtn">キャンセル</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var FN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-ai';
+  var id=Number(new URLSearchParams(window.location.search).get('id'));
+  var byId=function(x){return document.getElementById(x)};
+  var loading=byId('loading'), errorBox=byId('error'), card=byId('card'), formArea=byId('formArea'), saveBtn=byId('saveBtn');
+
+  function goBack(){ if(history.length>1){ history.back(); } else { location.href='estimate-notebook2.html?v=4'; } }
+  byId('backBtn').onclick=goBack; byId('cancelBtn').onclick=goBack;
+
+  function showError(msg){ loading.classList.add('hidden'); card.classList.add('hidden'); errorBox.textContent=String(msg||'読み込みに失敗しました'); errorBox.classList.remove('hidden'); }
+
+  async function api(body){
+    var controller=new AbortController();
+    var timer=setTimeout(function(){controller.abort()},12000);
+    try{
+      var res=await fetch(FN,{method:'POST',signal:controller.signal,headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+      var text=await res.text();
+      var data;
+      try{data=JSON.parse(text)}catch(_e){throw new Error('サーバーの返答を読み取れませんでした')}
+      if(!res.ok)throw new Error(data.error||'処理に失敗しました');
+      return data;
+    }catch(e){
+      if(e && e.name==='AbortError')throw new Error('読み込みに時間がかかりすぎました');
+      throw e;
+    }finally{ clearTimeout(timer); }
+  }
+
+  function addField(key,label,value,type,full){
+    var box=document.createElement('div'); box.className='field'+(full?' full':'');
+    var lab=document.createElement('label'); lab.textContent=label; box.appendChild(lab);
+    var el;
+    if(type==='textarea'){ el=document.createElement('textarea'); }
+    else { el=document.createElement('input'); el.type=type||'text'; }
+    el.id='f_'+key; el.value=value==null?'':String(value); box.appendChild(el); formArea.appendChild(box);
+  }
+
+  function addSection(title){ var d=document.createElement('div'); d.className='section'; d.textContent=title; formArea.appendChild(d); }
+
+  function addPriceRow(p){
+    var row=document.createElement('div'); row.className='priceRow';
+    ['quantity','unit_price','amount'].forEach(function(k,i){ var inp=document.createElement('input'); inp.type='number'; inp.className=['q','u','a'][i]; inp.placeholder=['数量','単価','金額'][i]; inp.value=p&&p[k]!=null?String(p[k]):''; row.appendChild(inp); });
+    var rm=document.createElement('button'); rm.type='button'; rm.className='remove'; rm.textContent='行削除'; rm.onclick=function(){row.remove()}; row.appendChild(rm);
+    byId('prices').appendChild(row);
+  }
+
+  function render(x){
+    formArea.innerHTML='';
+    addField('company_name','会社名',x.company_name,'text',true);
+    addField('product_name','図番・製品名',x.product_name,'text',true);
+    addField('customer_department','客先部署',x.customer_department,'text',false);
+    addField('customer_name','客先名',x.customer_name,'text',false);
+    addField('material','材質',x.material,'text',false);
+    addField('thickness','板厚',x.thickness,'text',false);
+    addField('width','横サイズ',x.width,'number',false);
+    addField('height','縦サイズ',x.height,'number',false);
+    addField('color_text','色',x.color_text,'text',false);
+    addField('manufacturing_method','製作方法',x.manufacturing_method,'text',false);
+    addField('delivery_text','納期',x.delivery_text,'text',false);
+    addField('person_in_charge','担当者',x.person_in_charge,'text',false);
+
+    addSection('数量別単価');
+    var priceBox=document.createElement('div'); priceBox.className='field full';
+    var prices=document.createElement('div'); prices.id='prices'; priceBox.appendChild(prices);
+    var add=document.createElement('button'); add.type='button'; add.className='btn gray'; add.textContent='＋ 数量行を追加'; add.onclick=function(){addPriceRow({})}; priceBox.appendChild(add); formArea.appendChild(priceBox);
+    var list=Array.isArray(x.estimate_notebook2_prices)?x.estimate_notebook2_prices.slice():[];
+    list.sort(function(a,b){return (a.sort_order||0)-(b.sort_order||0)});
+    if(list.length){list.forEach(addPriceRow)}else{addPriceRow({})}
+
+    addField('plate_fee','原版代',x.plate_fee,'number',false);
+    addField('notes','備考',x.notes,'textarea',true);
+
+    addSection('受注・失注結果');
+    var sbox=document.createElement('div'); sbox.className='field';
+    var slab=document.createElement('label'); slab.textContent='結果'; sbox.appendChild(slab);
+    var sel=document.createElement('select'); sel.id='status'; ['回答待ち','受注','失注'].forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;if((x.status||'回答待ち')===v)o.selected=true;sel.appendChild(o)}); sbox.appendChild(sel); formArea.appendChild(sbox);
+    addField('result_date','結果日',x.result_date||'','date',false);
+    addField('won_quantity','受注数量',x.won_quantity,'number',false);
+    addField('won_unit_price','受注単価',x.won_unit_price,'number',false);
+    addField('lost_reason','失注理由',x.lost_reason,'text',true);
+    addField('result_note','理由・結果メモ',x.result_note,'textarea',true);
+
+    loading.classList.add('hidden'); errorBox.classList.add('hidden'); card.classList.remove('hidden');
+  }
+
+  function val(k){var el=byId('f_'+k);return el?el.value:''}
+
+  saveBtn.onclick=async function(){
+    try{
+      saveBtn.disabled=true; saveBtn.textContent='保存中…';
+      var item={
+        company_name:val('company_name'),product_name:val('product_name'),customer_department:val('customer_department'),customer_name:val('customer_name'),material:val('material'),thickness:val('thickness'),width:val('width'),height:val('height'),color_text:val('color_text'),manufacturing_method:val('manufacturing_method'),delivery_text:val('delivery_text'),person_in_charge:val('person_in_charge'),plate_fee:val('plate_fee'),notes:val('notes'),status:byId('status').value,result_date:val('result_date'),won_quantity:val('won_quantity'),won_unit_price:val('won_unit_price'),lost_reason:val('lost_reason'),result_note:val('result_note'),prices:Array.from(document.querySelectorAll('.priceRow')).map(function(r){return{quantity:r.querySelector('.q').value||null,unit_price:r.querySelector('.u').value||null,amount:r.querySelector('.a').value||null}})
+      };
+      await api({action:'update',id:id,item:item});
+      alert('変更を保存しました'); goBack();
+    }catch(e){alert(e.message||String(e))}
+    finally{saveBtn.disabled=false;saveBtn.textContent='変更を保存'}
+  };
+
+  (async function(){
+    try{
+      if(!id)throw new Error('案件IDがありません');
+      var j=await api({action:'get',id:id});
+      if(!j || !j.item)throw new Error('見積データが見つかりません');
+      render(j.item);
+    }catch(e){showError(e.message||String(e))}
+  })();
+})();
+</script>
+</body>
+</html>
