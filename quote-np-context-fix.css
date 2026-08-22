@@ -52,3 +52,11 @@
   .quote-np-context-grid .np-date-wrap{grid-template-columns:minmax(0,1fr) 44px}
   .quote-np-context-grid .np-calendar-btn{width:44px;min-width:44px}
 }
+
+/* 見積もりノートは社内用のためログイン画面を表示しない */
+.auth-gate,
+#authGate{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
