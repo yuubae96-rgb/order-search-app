@@ -2,6 +2,7 @@
 (function(){
   const $=id=>document.getElementById(id);
   let mounted=false;
+  let enforcing=false;
 
   function addStyles(){
     if($('quoteManufacturingDetailsStyle')) return;
@@ -23,10 +24,32 @@
     document.head.appendChild(s);
   }
 
+  function ensurePosition(){
+    if(enforcing) return;
+    const wrap=$('mfgDetails');
+    const quote=$('quoteV2');
+    if(!wrap||!quote) return;
+    enforcing=true;
+    try{
+      const spec=quote.querySelector('.quote-spec-grid');
+      const optionList=$('quoteOptionList');
+      if(spec){
+        if(wrap.previousElementSibling!==spec) spec.insertAdjacentElement('afterend',wrap);
+      }else if(optionList){
+        if(wrap.nextElementSibling!==optionList) optionList.insertAdjacentElement('beforebegin',wrap);
+      }else if(wrap.parentElement!==quote){
+        quote.appendChild(wrap);
+      }
+      relocateOutsource();
+    }finally{
+      enforcing=false;
+    }
+  }
+
   function mount(){
     if(mounted) return true;
-    const grid=document.querySelector('.quote-spec-grid');
-    if(!grid) return false;
+    const quote=$('quoteV2');
+    if(!quote) return false;
     addStyles();
     const wrap=document.createElement('div');
     wrap.id='mfgDetails';
@@ -39,7 +62,8 @@
         <div class="mfg-choice-box"><div class="mfg-choice-title">形状</div><div class="mfg-radio-row"><label><input type="radio" name="f_shapeType" value="矩形" checked> 矩形</label><label><input type="radio" name="f_shapeType" value="異形"> 異形</label></div></div>
       </div>
       <div class="field mfg-extra-note"><label>補足情報</label><textarea id="f_supplementalInfo" placeholder="加工条件、注意点、支給材の内容などを記入"></textarea></div>`;
-    grid.insertAdjacentElement('afterend',wrap);
+    const optionList=$('quoteOptionList');
+    if(optionList) optionList.insertAdjacentElement('beforebegin',wrap); else quote.appendChild(wrap);
 
     if(window.StorageAPI && !StorageAPI.__manufacturingDetailFields){
       const oldAdd=StorageAPI.add.bind(StorageAPI);
@@ -53,7 +77,7 @@
 
     $('orderForm')?.addEventListener('reset',()=>setTimeout(resetFields,0));
     mounted=true;
-    relocateOutsource();
+    ensurePosition();
     return true;
   }
 
@@ -75,7 +99,7 @@
     setRadio('f_suppliedMaterial','false');
     setRadio('f_shapeType','矩形');
     if($('f_supplementalInfo')) $('f_supplementalInfo').value='';
-    relocateOutsource();
+    ensurePosition();
   }
 
   async function save(id){
@@ -99,14 +123,28 @@
     setRadio('f_suppliedMaterial',data?.supplied_material?'true':'false');
     setRadio('f_shapeType',data?.shape_type||'矩形');
     if($('f_supplementalInfo')) $('f_supplementalInfo').value=data?.supplemental_info||'';
-    relocateOutsource();
+    ensurePosition();
   }
 
   function start(){
-    if(!mount()){
-      let n=0;const t=setInterval(()=>{n++;if(mount()||n>60)clearInterval(t);},100);
-    }
-    let tries=0;const mover=setInterval(()=>{tries++;relocateOutsource();if($('outsourceWrap')||tries>80)clearInterval(mover);},100);
+    let tries=0;
+    const t=setInterval(()=>{
+      tries++;
+      if(mount()){
+        ensurePosition();
+        if(tries>5) clearInterval(t);
+      }
+      if(tries>100) clearInterval(t);
+    },100);
+
+    const observer=new MutationObserver(()=>{
+      if(!mounted) mount();
+      if(mounted) ensurePosition();
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+
+    window.addEventListener('pageshow',()=>setTimeout(ensurePosition,0));
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(ensurePosition,0);});
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();
