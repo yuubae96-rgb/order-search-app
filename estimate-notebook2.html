@@ -6,21 +6,13 @@
 <meta name="theme-color" content="#1c2024">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>見積もりノート2</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#17212b;background:#f4f6f8}*{box-sizing:border-box}body{margin:0}.wrap{max-width:820px;margin:auto;padding:16px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}h1{font-size:25px;margin:8px 0}.sub{color:#647281;font-size:14px}.card{background:#fff;border:1px solid #dce3e8;border-radius:16px;padding:16px;margin:14px 0}.hidden{display:none!important}.btn{border:0;border-radius:12px;padding:12px 15px;font-weight:800;font-size:15px;cursor:pointer}.primary{background:#111;color:#fff}.green{background:#18794e;color:#fff}.red{background:#b42318;color:#fff}.gray{background:#e9eef2;color:#24323d}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin:10px 0}.field label{display:block;font-size:12px;font-weight:800;color:#5b6873;margin-bottom:5px}input,textarea{width:100%;padding:11px;border:1px solid #cfd8df;border-radius:10px;font-size:16px;background:#fff}textarea{min-height:82px}.status{padding:8px 11px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block}.wait{background:#fff4cc}.won{background:#d9f5e7;color:#11623e}.lost{background:#fde2e0;color:#9d2018}.item{border-top:1px solid #edf1f4;padding:13px 0}.item:first-child{border-top:0}.name{font-weight:900;font-size:17px}.meta{font-size:13px;color:#667582;line-height:1.6}.priceRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:7px 0}.warn{background:#fff7e6;border:1px solid #ffd591;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}.loading{font-weight:900;text-align:center;padding:20px}.login{max-width:420px;margin:70px auto}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}@media(max-width:620px){.row,.priceRow{grid-template-columns:1fr}.wrap{padding:12px}h1{font-size:22px}}
+:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#17212b;background:#f4f6f8}*{box-sizing:border-box}body{margin:0}.wrap{max-width:820px;margin:auto;padding:16px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}h1{font-size:25px;margin:8px 0}.sub{color:#647281;font-size:14px}.card{background:#fff;border:1px solid #dce3e8;border-radius:16px;padding:16px;margin:14px 0}.hidden{display:none!important}.btn{border:0;border-radius:12px;padding:12px 15px;font-weight:800;font-size:15px;cursor:pointer}.primary{background:#111;color:#fff}.green{background:#18794e;color:#fff}.red{background:#b42318;color:#fff}.gray{background:#e9eef2;color:#24323d}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin:10px 0}.field label{display:block;font-size:12px;font-weight:800;color:#5b6873;margin-bottom:5px}input,textarea{width:100%;padding:11px;border:1px solid #cfd8df;border-radius:10px;font-size:16px;background:#fff}textarea{min-height:82px}.status{padding:8px 11px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block}.wait{background:#fff4cc}.won{background:#d9f5e7;color:#11623e}.lost{background:#fde2e0;color:#9d2018}.item{border-top:1px solid #edf1f4;padding:13px 0}.item:first-child{border-top:0}.name{font-weight:900;font-size:17px}.meta{font-size:13px;color:#667582;line-height:1.6}.priceRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:7px 0}.warn{background:#fff7e6;border:1px solid #ffd591;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}.loading{font-weight:900;text-align:center;padding:20px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}@media(max-width:620px){.row,.priceRow{grid-template-columns:1fr}.wrap{padding:12px}h1{font-size:22px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<div id="login" class="login card">
-<h1>見積もりノート2</h1><div class="sub">原本をAIが整理。担当者は受注・失注の結果だけ入力</div>
-<div class="field"><label>メールアドレス</label><input id="email" type="email"></div>
-<div class="field"><label>パスワード</label><input id="password" type="password"></div>
-<button class="btn primary" id="loginBtn">ログイン</button><div id="loginMsg" class="sub" style="margin-top:10px"></div>
-</div>
-<div id="app" class="hidden">
-<div class="top"><div><h1>見積もりノート2</h1><div class="sub">原本 → AI整理 → 回答待ち → 受注／失注</div></div><button class="btn gray" id="logoutBtn">ログアウト</button></div>
+<div class="top"><div><h1>見積もりノート2</h1><div class="sub">原本 → AI整理 → 回答待ち → 受注／失注</div></div></div>
 <div class="card"><h3>① 原本を追加</h3><input id="file" type="file" accept="application/pdf,image/*"><div class="actions"><button class="btn primary" id="analyzeBtn">AIで読み取る</button></div><div id="progress" class="hidden loading">AI読み取り中…</div><div id="error" class="warn hidden"></div></div>
 <div id="reviewCard" class="card hidden"><h3>② AI読取結果を確認</h3><div id="warnings"></div>
 <div class="row"><div class="field"><label>会社名</label><input id="company_name"></div><div class="field"><label>図番・製品名</label><input id="product_name"></div></div>
@@ -35,20 +27,10 @@
 <div class="actions"><button class="btn green" id="confirmBtn">確認して登録</button><button class="btn gray" id="sourceBtn">原本を見る</button></div></div>
 <div class="card"><div class="top"><h3>③ 案件一覧</h3><button class="btn gray" id="refreshBtn">更新</button></div><div class="field"><input id="search" placeholder="会社名・製品名・担当者で検索"></div><div id="list"></div></div>
 </div>
-</div>
 <script>
-const SUPABASE_URL='https://vnnvuxccazkdzwqjmntz.supabase.co';
-const SUPABASE_KEY='sb_publishable_xG-tuBgxFGntT1vlbZzuVQ_AZ2Zl8QL';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const fn=SUPABASE_URL+'/functions/v1/estimate-notebook2-ai';
-let analyzed=null;
-const $=id=>document.getElementById(id);
-const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
-async function token(){const {data}=await sb.auth.getSession();return data.session?.access_token||''}
-async function api(body){const t=await token();const r=await fetch(fn,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+t},body:JSON.stringify(body)});const j=await r.json();if(!r.ok)throw new Error(j.error||'処理に失敗しました');return j}
-async function showAuth(){const {data}=await sb.auth.getSession();const on=!!data.session;$('login').classList.toggle('hidden',on);$('app').classList.toggle('hidden',!on);if(on)loadList()}
-$('loginBtn').onclick=async()=>{try{$('loginMsg').textContent='ログイン中…';const {error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)throw error;$('loginMsg').textContent='';showAuth()}catch(e){$('loginMsg').textContent=e.message}}
-$('logoutBtn').onclick=async()=>{await sb.auth.signOut();showAuth()};
+const FN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-ai';
+let analyzed=null;const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+async function api(body){const r=await fetch(FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const j=await r.json();if(!r.ok)throw new Error(j.error||'処理に失敗しました');return j}
 function file64(f){return new Promise((ok,ng)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=ng;r.readAsDataURL(f)})}
 $('analyzeBtn').onclick=async()=>{const f=$('file').files[0];if(!f){alert('PDFまたは画像を選んでください');return}try{$('progress').classList.remove('hidden');$('error').classList.add('hidden');$('analyzeBtn').disabled=true;const base64=await file64(f);analyzed=await api({action:'analyze',file_name:f.name,mime_type:f.type||'application/octet-stream',base64});fill(analyzed.parsed);$('reviewCard').classList.remove('hidden')}catch(e){$('error').textContent=e.message;$('error').classList.remove('hidden')}finally{$('progress').classList.add('hidden');$('analyzeBtn').disabled=false}};
 function fill(p){['company_name','customer_department','customer_name','product_name','material','thickness','width','height','color_text','manufacturing_method','delivery_text','person_in_charge','plate_fee','notes'].forEach(k=>$(k).value=p[k]??'');const w=[...(p.uncertain_fields||[]),...(p.warnings||[])];$('warnings').innerHTML=w.length?'<div class="warn">AI要確認：'+w.map(esc).join(' / ')+'</div>':'';$('prices').innerHTML='';(p.prices||[]).forEach(addPriceRow);if(!(p.prices||[]).length)addPriceRow({})}
@@ -61,6 +43,6 @@ async function loadList(){try{const j=await api({action:'list',q:$('search').val
 function render(items){$('list').innerHTML=(items||[]).map(x=>{const cls=x.status==='受注'?'won':x.status==='失注'?'lost':'wait';const ps=(x.estimate_notebook2_prices||[]).map(p=>String(p.quantity??'?')+'枚 @'+String(p.unit_price??'?')).join(' / ');return '<div class="item"><div class="top"><div class="name">'+esc(x.company_name||'会社名未読取')+' / '+esc(x.product_name||'製品名未読取')+'</div><span class="status '+cls+'">'+esc(x.status)+'</span></div><div class="meta">'+esc(x.material||'')+' '+esc(x.thickness||'')+'　'+String(x.width??'')+'×'+String(x.height??'')+'<br>'+esc(ps)+'<br>担当：'+esc(x.person_in_charge||'')+'</div><div class="actions"><button class="btn gray" onclick="openSource(\''+esc(x.source_file_path||'')+'\')">原本</button><button class="btn green" onclick="setResult('+x.id+',\'受注\')">受注</button><button class="btn red" onclick="setResult('+x.id+',\'失注\')">失注</button><button class="btn gray" onclick="setResult('+x.id+',\'回答待ち\')">回答待ち</button></div></div>'}).join('')||'<div class="sub">まだ登録がありません</div>'}
 window.openSource=async path=>{const j=await api({action:'source_url',path});window.open(j.url,'_blank')};
 window.setResult=async(id,status)=>{try{let body={action:'update_result',id,status};if(status==='受注'){const q=prompt('受注数量を入力');if(q===null)return;const u=prompt('受注単価を入力');if(u===null)return;body.won_quantity=q;body.won_unit_price=u}else if(status==='失注'){const r=prompt('失注理由を入力してください（価格・納期・他社決定など）');if(r===null)return;body.lost_reason=r}const note=prompt('結果メモ（なければ空欄）','');if(note===null)return;body.result_note=note;await api(body);loadList()}catch(e){alert(e.message)}};
-$('refreshBtn').onclick=loadList;let st;$('search').oninput=()=>{clearTimeout(st);st=setTimeout(loadList,300)};showAuth();
+$('refreshBtn').onclick=loadList;let st;$('search').oninput=()=>{clearTimeout(st);st=setTimeout(loadList,300)};loadList();
 </script>
 </body></html>
