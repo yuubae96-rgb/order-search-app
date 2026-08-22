@@ -64,4 +64,4 @@ loadCompanyModule('materials-patch.js?v=20260819-0135');
 loadCompanyModule('material-auth-stop.js?v=20260821-0405');
 loadCompanyModule('material-unit-fix.js?v=20260821-0826');
 loadCompanyModule('material-delete.js?v=20260821-0802');
-loadCompanyModule('quote-manufacturing-details.js?v=20260822-1025');
+loadCompanyModule('quote-manufacturing-details.js?v=20260822-1035');
