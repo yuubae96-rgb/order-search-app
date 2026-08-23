@@ -1,0 +1,36 @@
+name: Bump due date hint cache
+
+on:
+  push:
+    paths:
+      - '.github/workflows/bump-due-date-hint-cache.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump form extras cache key
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('estimate-notebook2-core.html')
+          s=p.read_text()
+          old='estimate-notebook2-form-extras.js?v=20260823-humanheading1'
+          new='estimate-notebook2-form-extras.js?v=20260823-duehint1'
+          if old not in s and new not in s:
+              raise SystemExit('cache target not found')
+          s=s.replace(old,new)
+          p.write_text(s)
+          PY
+      - name: Commit cache bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add estimate-notebook2-core.html
+          git diff --cached --quiet || git commit -m "Refresh approval due date hint on iPhone"
+          git push
