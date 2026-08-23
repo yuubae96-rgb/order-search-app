@@ -114,3 +114,30 @@
   const btn=document.getElementById('confirmBtn');
   if(btn){btn.onclick=null;btn.addEventListener('click',submitWithNoDocsSupport,true)}
 })();
+
+(function(){
+  function escReturn(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
+  const style=document.createElement('style');
+  style.textContent='.returnReasonInline{margin-top:5px;padding:6px 8px;border-radius:8px;background:#fff1ef;color:#9d2018;font-size:11px;font-weight:900;line-height:1.45;border:1px solid #f0b8b2}.returnTab{border-color:#efb1aa!important;color:#9d2018!important;background:#fff5f4!important}.returnTab.active{background:#9d2018!important;color:#fff!important}';
+  document.head.appendChild(style);
+  const prevCompact=window.compact;
+  if(typeof prevCompact==='function')window.compact=function(x){
+    let h=prevCompact(x);
+    if(x&&x.workflow_status==='差戻し'){
+      const reason=x.approval_note?'<div class="returnReasonInline">社長からの差し戻し理由：'+escReturn(x.approval_note)+'</div>':'<div class="returnReasonInline">社長から差し戻されています。案件を開いて修正してください。</div>';
+      h=h.replace('<div class="cSub">'+escReturn(x.person_in_charge||'')+'</div>','<div class="cSub">'+escReturn(x.person_in_charge||'')+'</div>'+reason);
+    }
+    return h;
+  };
+  const tabs=document.querySelector('.tabs');
+  if(tabs&&!tabs.querySelector('[data-filter="差戻し"]')){
+    const apply=tabs.querySelector('[data-filter="申請中"]');
+    const b=document.createElement('button');b.className='tab returnTab';b.dataset.filter='差戻し';b.textContent='差戻し';
+    if(apply)apply.insertAdjacentElement('afterend',b);else tabs.appendChild(b);
+    b.addEventListener('click',function(){
+      try{filter='差戻し';document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===b));render()}catch(e){console.warn(e)}
+    });
+  }
+  const prevMatch=window.match;
+  if(typeof prevMatch==='function')window.match=function(x){if(typeof filter!=='undefined'&&filter==='差戻し')return x.workflow_status==='差戻し';return prevMatch(x)};
+})();
