@@ -11,6 +11,8 @@
     t=t.replace("request_type:'依頼種別'","request_type:'見積・単価・注文予定見積'");
     t=t.replace("separate_drawing_kind:'別紙図面（単・継・不明）'","separate_drawing_kind:'案件の継続性（単・継・不明）'");
     t=t.replace("detail_sheet_present:'詳細別紙'","detail_sheet_present:'詳細別紙(要確認)'");
+    t=t.replace("plate_fee:'原版代'","plate_fee:'原版代(確認・手入力)'");
+    t=t.replace('<label>承認希望期限</label><input id="approvalDueDate" type="date">','<label>承認希望期限</label><div style="position:relative"><input id="approvalDueDate" type="date" style="position:relative;z-index:2;background:transparent"><span id="approvalDueDateCoreHint" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#a8b1bb;font-size:15px;font-weight:600;pointer-events:none;z-index:1;white-space:nowrap">回答・承認希望の日付を選択</span></div>');
     t=t.replace('<button class="btn primary" id="analyzeBtn">AIで読み取る</button>','<button class="btn primary" id="analyzeBtn">AIで読み取る</button><button class="btn gray" id="archiveOnlyBtn" type="button">原本画像を保管するだけ</button>');
     t=t.replace("const SFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-customer-supply';","const SFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-customer-supply';\nconst UFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-urgency';");
     t=t.replace("let j=await api(FN,{action:'confirm',parsed,source_file_path:analyzed.source_file_path,source_file_name:analyzed.source_file_name,ai_raw:analyzed.ai_raw});await api(SFN,{id:j.id,plate_fee_present:parsed.plate_fee_present});","let j=await api(FN,{action:'confirm',parsed,source_file_path:analyzed.source_file_path,source_file_name:analyzed.source_file_name,ai_raw:analyzed.ai_raw});await api(UFN,{id:j.id,urgency_status:parsed.urgency_status});await api(SFN,{id:j.id,plate_fee_present:parsed.plate_fee_present});");
@@ -18,6 +20,8 @@
       '<script>(function(){'+
       'function owner(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator==="function"?parent.getCurrentOperator():null;return !!o&&o.name==="承認(社長)";}catch(e){return false}}'+
       'function operatorName(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator==="function"?parent.getCurrentOperator():null;return o&&o.name?String(o.name):"";}catch(e){return ""}}'+
+      'function syncDueHint(){var i=document.getElementById("approvalDueDate"),h=document.getElementById("approvalDueDateCoreHint");if(i&&h)h.style.display=i.value?"none":"block"}'+
+      'var di=document.getElementById("approvalDueDate");if(di){di.addEventListener("input",syncDueHint);di.addEventListener("change",syncDueHint);syncDueHint()}'+
       'async function archiveOnly(){var f=document.getElementById("file")?.files?.[0];if(!f)return alert("原本を選んでください");var b=document.getElementById("archiveOnlyBtn");try{b.disabled=true;b.textContent="保管中…";await api("https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-archive",{file_name:f.name,mime_type:f.type||"application/octet-stream",base64:await file64(f),person_in_charge:operatorName()});alert("原本を見積保管庫に保管しました");document.getElementById("file").value="";if(typeof load==="function")await load()}catch(e){alert(e.message)}finally{b.disabled=false;b.textContent="原本画像を保管するだけ"}}'+
       'function ensureList(id,vals){var d=document.getElementById(id);if(!d){d=document.createElement("datalist");d.id=id;document.body.appendChild(d)}d.innerHTML=vals.map(function(v){return "<option value=\\\""+v.replace(/&/g,"&amp;").replace(/\\\"/g,"&quot;")+"\\\"></option>"}).join("")}'+
       'function setUrgencyVisual(d,status){if(!d)return;if(status){d.dataset.checked="1";d.style.background="";d.style.padding=""}else{delete d.dataset.checked;d.style.background="#fff5f4";d.style.padding="6px";d.style.borderRadius="9px"}}'+
@@ -33,7 +37,7 @@
       'setInterval(addDeletes,700);setInterval(patchTopButton,700);addDeletes();patchTopButton();installProgress();var aob=document.getElementById("archiveOnlyBtn");if(aob)aob.onclick=archiveOnly;'+
       '})();<\/script>';
     t=t.replace('</body>',patch+'</body>');
-    t=t.replace('</body>','<script src="estimate-notebook2-archive-ui.js?v=20260823-1"><\/script><script src="estimate-notebook2-form-extras.js?v=20260823-duehint1"><\/script></body>');
+    t=t.replace('</body>','<script src="estimate-notebook2-archive-ui.js?v=20260823-1"><\/script><script src="estimate-notebook2-form-extras.js?v=20260823-directcore1"><\/script></body>');
     document.open();
     document.write(t);
     document.close();
