@@ -79,7 +79,7 @@
     if(!fs.length&&!noDocs)return alert('図面・要求メールなど承認に必要な資料を1つ以上添付するか、「今回必要資料無し」にチェックしてください');
     try{btn.disabled=true;btn.textContent='申請データ登録中…';let j=await api(FN,{action:'confirm',parsed,source_file_path:analyzed.source_file_path,source_file_name:analyzed.source_file_name,ai_raw:analyzed.ai_raw});await api(UFN,{id:j.id,urgency_status:parsed.urgency_status});await api(SFN,{id:j.id,plate_fee_present:parsed.plate_fee_present});
       for(let i=0;i<fs.length;i++){let f=fs[i];if(f.size>8*1024*1024)throw Error(f.name+' は8MBを超えています');btn.textContent='資料アップロード '+(i+1)+'/'+fs.length+'…';await api(AFN,{action:'upload_attachment',id:j.id,file_name:f.name,mime_type:f.type||'application/octet-stream',file_kind:'承認資料',base64:await file64(f)})}
-      btn.textContent='申請中…';await api(AFN,{action:'submit_snapshot',id:j.id,approval_due_date:due});alert('見積を申請しました');resetRead();load();
+      btn.textContent='申請中…';await api(AFN,{action:'submit_snapshot',id:j.id,approval_due_date:due,no_support_needed:noDocs});alert('見積を申請しました');resetRead();load();
     }catch(err){alert(err.message)}finally{btn.disabled=false;btn.textContent='この内容で申請する'}
   }
 
