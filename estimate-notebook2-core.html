@@ -42,6 +42,18 @@
       if(r) new MutationObserver(sync).observe(r,{attributes:true,attributeFilter:['class']});
       setInterval(sync,500);
       sync();
+      var topTab=[...pd.querySelectorAll('.nav[data-pane="app"]')][0];
+      if(topTab && !topTab.dataset.aiResetBound){
+        topTab.dataset.aiResetBound='1';
+        topTab.addEventListener('click',function(){
+          try{
+            var review=document.getElementById('reviewCard');
+            if(review && !review.classList.contains('hidden') && typeof window.resetRead==='function') window.resetRead();
+            else window.scrollTo({top:0,behavior:'smooth'});
+            b.style.display='none';
+          }catch(e){console.warn(e)}
+        });
+      }
       window.addEventListener('beforeunload',function(){try{b.style.display='none'}catch(e){}});
     }
     setTimeout(setupOuterSourceButton,0);
