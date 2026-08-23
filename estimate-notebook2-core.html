@@ -8,6 +8,7 @@
     x.send(null);
     if(x.status<200||x.status>=300) throw new Error('base load '+x.status);
     var t=x.responseText;
+    t=t.replace("request_type:'依頼種別'","request_type:'見積・単価・注文予定見積'");
     t=t.replace("separate_drawing_kind:'別紙図面（単・継・不明）'","separate_drawing_kind:'案件の継続性（単・継・不明）'");
     t=t.replace("const SFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-customer-supply';","const SFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-customer-supply';\nconst UFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-urgency';");
     t=t.replace("let j=await api(FN,{action:'confirm',parsed,source_file_path:analyzed.source_file_path,source_file_name:analyzed.source_file_name,ai_raw:analyzed.ai_raw});await api(SFN,{id:j.id,plate_fee_present:parsed.plate_fee_present});","let j=await api(FN,{action:'confirm',parsed,source_file_path:analyzed.source_file_path,source_file_name:analyzed.source_file_name,ai_raw:analyzed.ai_raw});await api(UFN,{id:j.id,urgency_status:parsed.urgency_status});await api(SFN,{id:j.id,plate_fee_present:parsed.plate_fee_present});");
