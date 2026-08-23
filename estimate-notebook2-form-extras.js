@@ -66,15 +66,23 @@
   if(typeof prevReset==='function')window.resetRead=function(){const r=prevReset();const c=document.getElementById('noSupportNeeded');if(c)c.checked=false;return r};
   installNoDocs();installHumanWarnings();
 
-  const btn=document.getElementById('confirmBtn');
-  if(btn){btn.onclick=async()=>{
+  async function submitWithNoDocsSupport(e){
+    if(e){e.preventDefault();e.stopImmediatePropagation();}
+    const btn=document.getElementById('confirmBtn');
     let unchecked=[...document.querySelectorAll('[data-field]')].filter(d=>d.style.background&&!d.dataset.checked);if(unchecked.length)return alert('赤い要チェック項目を確認してください');
     let parsed=current();if(parsed.plate_fee_present===null)return alert('原版代の「有」または「無」を選択してください');if(parsed.plate_fee_present&&parsed.plate_fee===null)return alert('原版代「有」の場合は金額を入力してください');
     let due=document.getElementById('approvalDueDate').value;if(!due)return alert('承認希望期限を入力してください');
-    const fs=[...document.getElementById('supportFiles').files],noDocs=!!document.getElementById('noSupportNeeded')?.checked;if(!fs.length&&!noDocs)return alert('図面・要求メールなど承認に必要な資料を1つ以上添付するか、「今回必要資料無し」にチェックしてください');
+    const support=document.getElementById('supportFiles');
+    const fs=support?[...support.files]:[];
+    const noDocsBox=document.getElementById('noSupportNeeded');
+    const noDocs=!!(noDocsBox&&noDocsBox.checked);
+    if(!fs.length&&!noDocs)return alert('図面・要求メールなど承認に必要な資料を1つ以上添付するか、「今回必要資料無し」にチェックしてください');
     try{btn.disabled=true;btn.textContent='申請データ登録中…';let j=await api(FN,{action:'confirm',parsed,source_file_path:analyzed.source_file_path,source_file_name:analyzed.source_file_name,ai_raw:analyzed.ai_raw});await api(UFN,{id:j.id,urgency_status:parsed.urgency_status});await api(SFN,{id:j.id,plate_fee_present:parsed.plate_fee_present});
       for(let i=0;i<fs.length;i++){let f=fs[i];if(f.size>8*1024*1024)throw Error(f.name+' は8MBを超えています');btn.textContent='資料アップロード '+(i+1)+'/'+fs.length+'…';await api(AFN,{action:'upload_attachment',id:j.id,file_name:f.name,mime_type:f.type||'application/octet-stream',file_kind:'承認資料',base64:await file64(f)})}
       btn.textContent='申請中…';await api(AFN,{action:'submit_snapshot',id:j.id,approval_due_date:due});alert('見積を申請しました');resetRead();load();
-    }catch(e){alert(e.message)}finally{btn.disabled=false;btn.textContent='この内容で申請する'}
-  }}
+    }catch(err){alert(err.message)}finally{btn.disabled=false;btn.textContent='この内容で申請する'}
+  }
+
+  const btn=document.getElementById('confirmBtn');
+  if(btn){btn.onclick=null;btn.addEventListener('click',submitWithNoDocsSupport,true)}
 })();
