@@ -9,8 +9,8 @@
     if(x.status<200||x.status>=300) throw new Error('base load '+x.status);
     var t=x.responseText;
     t=t.replace("separate_drawing_kind:'別紙図面（単・継・不明）'","separate_drawing_kind:'種類（単・継・不明）'");
-    var patch='<style>.ownerDeleteBtn{border:1px solid #d92d20;background:#fff;color:#b42318;border-radius:7px;padding:4px 7px;margin-left:6px;font-size:11px;font-weight:900;vertical-align:1px}</style>'+
-      '<script>(function(){function owner(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator==="function"?parent.getCurrentOperator():null;return !!o&&o.name==="承認(社長)";}catch(e){return false}}function addDeletes(){document.querySelectorAll(".compact").forEach(function(row){if(!owner()){row.querySelectorAll(".ownerDeleteBtn").forEach(function(z){z.remove()});return}if(row.querySelector(".ownerDeleteBtn"))return;var link=row.querySelector(".productLink");if(!link)return;var m=(link.getAttribute("onclick")||"").match(/openDetail\\((\\d+)\\)/);if(!m)return;var id=Number(m[1]);var company=(row.querySelector(".cName")?.textContent||"案件").split("/")[0].trim();var d=document.createElement("button");d.type="button";d.className="ownerDeleteBtn";d.textContent="削除";d.onclick=function(e){e.stopPropagation();if(typeof del==="function")del(id,company)};link.insertAdjacentElement("afterend",d)});}var oldRender=window.render;if(typeof oldRender==="function"){window.render=function(){var z=oldRender.apply(this,arguments);setTimeout(addDeletes,0);return z}}setInterval(addDeletes,700);addDeletes();})();<\/script>';
+    var patch='<style>.ownerDeleteBtn{border:1px solid #d92d20;background:#fff;color:#b42318;border-radius:7px;padding:4px 7px;margin-left:6px;font-size:11px;font-weight:900;vertical-align:1px}</style>'+ 
+      '<script>(function(){function owner(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator==="function"?parent.getCurrentOperator():null;return !!o&&o.name==="承認(社長)";}catch(e){return false}}function addDeletes(){document.querySelectorAll(".compact").forEach(function(row){if(!owner()){row.querySelectorAll(".ownerDeleteBtn").forEach(function(z){z.remove()});return}if(row.querySelector(".ownerDeleteBtn"))return;var link=row.querySelector(".productLink");if(!link)return;var m=(link.getAttribute("onclick")||"").match(/openDetail\\((\\d+)\\)/);if(!m)return;var id=Number(m[1]);var company=(row.querySelector(".cName")?.textContent||"案件").split("/")[0].trim();var d=document.createElement("button");d.type="button";d.className="ownerDeleteBtn";d.textContent="削除";d.onclick=function(e){e.stopPropagation();if(typeof del==="function")del(id,company)};link.insertAdjacentElement("afterend",d)});}function patchTopButton(){var b=document.getElementById("sourceTopBtn");if(!b)return;b.textContent="TOPに戻る";b.onclick=function(){if(confirm("今回のAI読み取り結果を取り消してTOPに戻りますか？\\nまだ申請していないため、案件データは登録されません。")){if(typeof resetRead==="function")resetRead();}};}var oldRender=window.render;if(typeof oldRender==="function"){window.render=function(){var z=oldRender.apply(this,arguments);setTimeout(addDeletes,0);return z}}setInterval(addDeletes,700);setInterval(patchTopButton,700);addDeletes();patchTopButton();})();<\/script>';
     t=t.replace('</body>',patch+'</body>');
     document.open();
     document.write(t);
@@ -31,7 +31,7 @@
       b.onclick=function(){
         try{
           if(typeof window.openAnalyzedSource==='function') window.openAnalyzedSource();
-          else document.getElementById('sourceTopBtn')?.click();
+          else document.getElementById('sourceBtn')?.click();
         }catch(e){console.warn(e)}
       };
       function sync(){
