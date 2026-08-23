@@ -71,3 +71,31 @@
   function hook(){if(!owner())return;installControls();const nav=[...pd.querySelectorAll('.nav')].find(x=>x.dataset.pane==='history');if(nav&&!nav.dataset.selectHistoryHook){nav.dataset.selectHistoryHook='1';nav.addEventListener('click',()=>setTimeout(loadSelectableLogs,80))}const pane=pd.getElementById('history');if(pane&&pane.classList.contains('active')){const logs=pd.getElementById('logs');if(logs&&!logs.querySelector('.historySelect')&&logs.querySelector('.log'))loadSelectableLogs()}}
   setInterval(hook,500);setTimeout(hook,100);
 })();
+
+(function(){
+  function owner(){
+    try{
+      const p=parent&&parent!==window&&typeof parent.getCurrentOperator==='function'?parent.getCurrentOperator():null;
+      if(p&&String(p.name||'').trim()==='承認(社長)')return true;
+      return String(parent?.document?.getElementById('whoBtn')?.textContent||'').trim().startsWith('承認(社長)');
+    }catch(e){return false}
+  }
+  const prevDetailed=window.detailed;
+  if(typeof prevDetailed==='function')window.detailed=function(x){
+    let h=prevDetailed(x);
+    if(!owner())h=h.replace(/<button class="btn danger"[^>]*>削除<\/button>/g,'');
+    return h;
+  };
+  const prevDel=window.del;
+  if(typeof prevDel==='function')window.del=async function(){
+    if(!owner())return alert('案件の削除は「承認(社長)」のみ実行できます。');
+    return prevDel.apply(this,arguments);
+  };
+  function sync(){
+    if(owner())return;
+    document.querySelectorAll('button.btn.danger').forEach(b=>{
+      if((b.getAttribute('onclick')||'').includes('del('))b.remove();
+    });
+  }
+  setInterval(sync,400);setTimeout(sync,50);
+})();
