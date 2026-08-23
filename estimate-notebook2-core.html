@@ -8,7 +8,7 @@
     x.send(null);
     if(x.status<200||x.status>=300) throw new Error('base load '+x.status);
     var t=x.responseText;
-    t=t.replace("separate_drawing_kind:'別紙図面（単・継・不明）'","separate_drawing_kind:'種類（単・継・不明）'");
+    t=t.replace("separate_drawing_kind:'別紙図面（単・継・不明）'","separate_drawing_kind:'案件の継続性（単・継・不明）'");
     var patch='<style>.ownerDeleteBtn{border:1px solid #d92d20;background:#fff;color:#b42318;border-radius:7px;padding:4px 7px;margin-left:6px;font-size:11px;font-weight:900;vertical-align:1px}.urgentCheckBox{display:flex;align-items:center;gap:10px;min-height:50px;padding:10px 12px;border:2px solid #efb1aa;border-radius:11px;background:#fff7f6;font-weight:900;color:#b42318}.urgentCheckBox input{width:24px;height:24px;margin:0}.urgentMark{display:inline-block;background:#d92d20;color:#fff;border-radius:999px;padding:3px 7px;margin-right:5px;font-size:10px;font-weight:900;vertical-align:2px}</style>'+ 
       '<script>(function(){'+
       'function owner(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator==="function"?parent.getCurrentOperator():null;return !!o&&o.name==="承認(社長)";}catch(e){return false}}'+
