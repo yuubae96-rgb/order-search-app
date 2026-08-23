@@ -4,29 +4,26 @@
 (function(){
   try{
     var x=new XMLHttpRequest();
-    x.open('GET','estimate-notebook2-core-base.html?v=20260823-fixedsource2',false);
+    x.open('GET','estimate-notebook2-core-base.html?v=20260823-progress1',false);
     x.send(null);
     if(x.status<200||x.status>=300) throw new Error('base load '+x.status);
     var t=x.responseText;
     t=t.replace("separate_drawing_kind:'別紙図面（単・継・不明）'","separate_drawing_kind:'案件の継続性（単・継・不明）'");
-    var patch='<style>.ownerDeleteBtn{border:1px solid #d92d20;background:#fff;color:#b42318;border-radius:7px;padding:4px 7px;margin-left:6px;font-size:11px;font-weight:900;vertical-align:1px}.urgentCheckBox{display:flex;align-items:center;gap:10px;min-height:50px;padding:10px 12px;border:2px solid #efb1aa;border-radius:11px;background:#fff7f6;font-weight:900;color:#b42318}.urgentCheckBox input{width:24px;height:24px;margin:0}.urgentMark{display:inline-block;background:#d92d20;color:#fff;border-radius:999px;padding:3px 7px;margin-right:5px;font-size:10px;font-weight:900;vertical-align:2px}</style>'+ 
+    var patch='<style>.ownerDeleteBtn{border:1px solid #d92d20;background:#fff;color:#b42318;border-radius:7px;padding:4px 7px;margin-left:6px;font-size:11px;font-weight:900;vertical-align:1px}.urgentCheckBox{display:flex;align-items:center;gap:10px;min-height:50px;padding:10px 12px;border:2px solid #efb1aa;border-radius:11px;background:#fff7f6;font-weight:900;color:#b42318}.urgentCheckBox input{width:24px;height:24px;margin:0}.urgentMark{display:inline-block;background:#d92d20;color:#fff;border-radius:999px;padding:3px 7px;margin-right:5px;font-size:10px;font-weight:900;vertical-align:2px}.aiProgressBox{max-width:520px;margin:0 auto;padding:14px 16px;border-radius:12px;background:#f4f7f9;text-align:left}.aiProgressMain{font-size:16px;font-weight:900}.aiProgressTime{margin-top:6px;font-size:13px;color:#5d6973}.aiProgressBar{height:8px;margin-top:10px;border-radius:999px;background:#dfe6eb;overflow:hidden}.aiProgressBar span{display:block;height:100%;width:8%;border-radius:999px;background:#145ea8;transition:width .8s ease}</style>'+ 
       '<script>(function(){'+
       'function owner(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator==="function"?parent.getCurrentOperator():null;return !!o&&o.name==="承認(社長)";}catch(e){return false}}'+
       'function operatorName(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator==="function"?parent.getCurrentOperator():null;return o&&o.name?String(o.name):"";}catch(e){return ""}}'+
       'function ensureList(id,vals){var d=document.getElementById(id);if(!d){d=document.createElement("datalist");d.id=id;document.body.appendChild(d)}d.innerHTML=vals.map(function(v){return "<option value=\\\""+v.replace(/&/g,"&amp;").replace(/\\\"/g,"&quot;")+"\\\"></option>"}).join("")}'+
-      'function enhanceForm(p){'+
-      'ensureList("materialChoices",["アルミ","ステンレス","真鍮","ケシ銀"]);ensureList("methodChoices",["シール","オフセット","シルク","写真シール","シルク(H)","彫刻","新フルカラー(H)","アルマイト","エッチング","新フルカラー","外注"]);'+
-      'var m=document.getElementById("material");if(m){m.setAttribute("list","materialChoices");m.setAttribute("autocomplete","off")}var mm=document.getElementById("manufacturing_method");if(mm){mm.setAttribute("list","methodChoices");mm.setAttribute("autocomplete","off")}'+
-      'var d=document.querySelector("[data-field=\\\"person_in_charge\\\"]");if(d){d.style.background="";d.style.padding="";d.dataset.checked="1";d.innerHTML="<label>急ぎ案件</label><label class=\\\"urgentCheckBox\\\"><input id=\\\"isUrgent\\\" type=\\\"checkbox\\\">客先が急ぎの案件</label><input id=\\\"person_in_charge\\\" type=\\\"hidden\\\">";var u=document.getElementById("isUrgent");if(u)u.checked=!!(p&&p.is_urgent);var h=document.getElementById("person_in_charge");if(h)h.value=operatorName()}'+
-      '}'+
+      'function enhanceForm(p){ensureList("materialChoices",["アルミ","ステンレス","真鍮","ケシ銀"]);ensureList("methodChoices",["シール","オフセット","シルク","写真シール","シルク(H)","彫刻","新フルカラー(H)","アルマイト","エッチング","新フルカラー","外注"]);var m=document.getElementById("material");if(m){m.setAttribute("list","materialChoices");m.setAttribute("autocomplete","off")}var mm=document.getElementById("manufacturing_method");if(mm){mm.setAttribute("list","methodChoices");mm.setAttribute("autocomplete","off")}var d=document.querySelector("[data-field=\\\"person_in_charge\\\"]");if(d){d.style.background="";d.style.padding="";d.dataset.checked="1";d.innerHTML="<label>急ぎ案件</label><label class=\\\"urgentCheckBox\\\"><input id=\\\"isUrgent\\\" type=\\\"checkbox\\\">客先が急ぎの案件</label><input id=\\\"person_in_charge\\\" type=\\\"hidden\\\">";var u=document.getElementById("isUrgent");if(u)u.checked=!!(p&&p.is_urgent);var h=document.getElementById("person_in_charge");if(h)h.value=operatorName()}}'+
       'function addDeletes(){document.querySelectorAll(".compact").forEach(function(row){if(!owner()){row.querySelectorAll(".ownerDeleteBtn").forEach(function(z){z.remove()});return}if(row.querySelector(".ownerDeleteBtn"))return;var link=row.querySelector(".productLink");if(!link)return;var m=(link.getAttribute("onclick")||"").match(/openDetail\\((\\d+)\\)/);if(!m)return;var id=Number(m[1]);var company=(row.querySelector(".cName")?.textContent||"案件").split("/")[0].trim();var d=document.createElement("button");d.type="button";d.className="ownerDeleteBtn";d.textContent="削除";d.onclick=function(e){e.stopPropagation();if(typeof del==="function")del(id,company)};link.insertAdjacentElement("afterend",d)})}'+
       'function patchTopButton(){var b=document.getElementById("sourceTopBtn");if(!b)return;b.textContent="TOPに戻る";b.onclick=function(){if(confirm("今回のAI読み取り結果を取り消してTOPに戻りますか？\\nまだ申請していないため、案件データは登録されません。")){if(typeof resetRead==="function")resetRead();}}}'+
+      'function installProgress(){var btn=document.getElementById("analyzeBtn"),p=document.getElementById("progress");if(!btn||!p||btn.dataset.progressWrapped)return;btn.dataset.progressWrapped="1";var old=btn.onclick;btn.onclick=async function(){var started=Date.now(),avg=Number(localStorage.getItem("estimateAiAvgMs")||35000);avg=Math.max(18000,Math.min(75000,avg));var timer=null;function draw(){var e=Date.now()-started,ratio=Math.min(.94,e/avg),remain=Math.max(0,Math.round((avg-e)/1000)),phase=ratio<.18?"原本を準備中…":ratio<.72?"項目を読み取り中…":"選択項目を確認中…";var time=remain>0?"目安 あと約 "+remain+"秒":"まもなく完了します…";p.innerHTML="<div class=\\\"aiProgressBox\\\"><div class=\\\"aiProgressMain\\\">"+phase+"</div><div class=\\\"aiProgressTime\\\">"+time+"　※AI処理のため前後します</div><div class=\\\"aiProgressBar\\\"><span style=\\\"width:"+Math.max(8,Math.round(ratio*100))+"%\\\"></span></div></div>"}draw();timer=setInterval(draw,1000);try{var r=old?await old.apply(this,arguments):undefined;var elapsed=Date.now()-started;if(elapsed>3000&&document.getElementById("reviewCard")&&!document.getElementById("reviewCard").classList.contains("hidden")){var next=Math.round(avg*.7+elapsed*.3);localStorage.setItem("estimateAiAvgMs",String(next))}return r}finally{clearInterval(timer)}}}'+
       'var oldFill=window.fill;if(typeof oldFill==="function"){window.fill=function(p){p=Object.assign({},p||{});p.person_in_charge=operatorName();var r=oldFill(p);enhanceForm(p);return r}}'+
       'var oldCurrent=window.current;if(typeof oldCurrent==="function"){window.current=function(){var p=oldCurrent();p.person_in_charge=operatorName()||p.person_in_charge||"";p.is_urgent=!!document.getElementById("isUrgent")?.checked;return p}}'+
       'var oldCompact=window.compact;if(typeof oldCompact==="function"){window.compact=function(x){var h=oldCompact(x);return x&&x.is_urgent?h.replace("<div class=\\\"cName\\\">","<div class=\\\"cName\\\"><span class=\\\"urgentMark\\\">急ぎ</span>"):h}}'+
       'var oldDetailed=window.detailed;if(typeof oldDetailed==="function"){window.detailed=function(x){var h=oldDetailed(x);return x&&x.is_urgent?h.replace("<div class=\\\"name\\\">","<div class=\\\"name\\\"><span class=\\\"urgentMark\\\">急ぎ</span>"):h}}'+
       'var oldRender=window.render;if(typeof oldRender==="function"){window.render=function(){var z=oldRender.apply(this,arguments);setTimeout(addDeletes,0);return z}}'+
-      'setInterval(addDeletes,700);setInterval(patchTopButton,700);addDeletes();patchTopButton();'+
+      'setInterval(addDeletes,700);setInterval(patchTopButton,700);addDeletes();patchTopButton();installProgress();'+
       '})();<\/script>';
     t=t.replace('</body>',patch+'</body>');
     document.open();
@@ -37,47 +34,15 @@
       if(!parent || parent===window) return;
       var pd=parent.document;
       var b=pd.getElementById('globalFloatingSourceBtn');
-      if(!b){
-        b=pd.createElement('button');
-        b.id='globalFloatingSourceBtn';
-        b.type='button';
-        b.textContent='原本を見る';
-        b.style.cssText='position:fixed;right:12px;top:112px;z-index:999999;border:1px solid #c7d0d7;border-radius:11px;padding:11px 14px;font-weight:900;font-size:14px;background:#e9eef2;color:#24323d;box-shadow:0 3px 14px rgba(0,0,0,.18);display:none';
-        pd.body.appendChild(b);
-      }
-      b.onclick=function(){
-        try{
-          if(typeof window.openAnalyzedSource==='function') window.openAnalyzedSource();
-          else document.getElementById('sourceBtn')?.click();
-        }catch(e){console.warn(e)}
-      };
-      function sync(){
-        var r=document.getElementById('reviewCard');
-        b.style.display=(r && !r.classList.contains('hidden'))?'block':'none';
-      }
-      var r=document.getElementById('reviewCard');
-      if(r) new MutationObserver(sync).observe(r,{attributes:true,attributeFilter:['class']});
-      setInterval(sync,500);
-      sync();
-      var topTab=[...pd.querySelectorAll('.nav[data-pane="app"]')][0];
-      if(topTab && !topTab.dataset.aiResetBound){
-        topTab.dataset.aiResetBound='1';
-        topTab.addEventListener('click',function(){
-          try{
-            var review=document.getElementById('reviewCard');
-            if(review && !review.classList.contains('hidden') && typeof window.resetRead==='function') window.resetRead();
-            else window.scrollTo({top:0,behavior:'smooth'});
-            b.style.display='none';
-          }catch(e){console.warn(e)}
-        });
-      }
-      window.addEventListener('beforeunload',function(){try{b.style.display='none'}catch(e){}});
+      if(!b){b=pd.createElement('button');b.id='globalFloatingSourceBtn';b.type='button';b.textContent='原本を見る';b.style.cssText='position:fixed;right:12px;top:112px;z-index:999999;border:1px solid #c7d0d7;border-radius:11px;padding:11px 14px;font-weight:900;font-size:14px;background:#e9eef2;color:#24323d;box-shadow:0 3px 14px rgba(0,0,0,.18);display:none';pd.body.appendChild(b)}
+      b.onclick=function(){try{if(typeof window.openAnalyzedSource==='function')window.openAnalyzedSource();else document.getElementById('sourceBtn')?.click()}catch(e){console.warn(e)}};
+      function sync(){var r=document.getElementById('reviewCard');b.style.display=(r&&!r.classList.contains('hidden'))?'block':'none'}
+      var r=document.getElementById('reviewCard');if(r)new MutationObserver(sync).observe(r,{attributes:true,attributeFilter:['class']});setInterval(sync,500);sync();
+      var topTab=[...pd.querySelectorAll('.nav[data-pane="app"]')][0];if(topTab&&!topTab.dataset.aiResetBound){topTab.dataset.aiResetBound='1';topTab.addEventListener('click',function(){try{var review=document.getElementById('reviewCard');if(review&&!review.classList.contains('hidden')&&typeof window.resetRead==='function')window.resetRead();else window.scrollTo({top:0,behavior:'smooth'});b.style.display='none'}catch(e){console.warn(e)}})}
+      window.addEventListener('beforeunload',function(){try{b.style.display='none'}catch(e){}})
     }
     setTimeout(setupOuterSourceButton,0);
-  }catch(e){
-    document.body.innerHTML='<div style="font-family:sans-serif;padding:20px;color:#b42318">画面の読み込みに失敗しました。再読み込みしてください。</div>';
-    console.error(e);
-  }
+  }catch(e){document.body.innerHTML='<div style="font-family:sans-serif;padding:20px;color:#b42318">画面の読み込みに失敗しました。再読み込みしてください。</div>';console.error(e)}
 })();
 </script>
 </body></html>
