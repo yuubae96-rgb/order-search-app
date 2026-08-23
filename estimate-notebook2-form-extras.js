@@ -20,10 +20,16 @@
     color.insertAdjacentElement('afterend',d);
   }
   function installHumanWarnings(){
-    ['detail_sheet_present','separate_drawing_present'].forEach(id=>{
-      const d=document.querySelector('[data-field="'+id+'"]'),label=d&&d.querySelector('label');if(!label||label.querySelector('.humanCheckWarning'))return;
-      const s=document.createElement('span');s.className='humanCheckWarning';s.textContent='人が確認記入！';s.style.cssText='color:#d92d20;font-weight:900;margin-left:10px;font-size:14px;white-space:nowrap';label.appendChild(s);
-    });
+    document.querySelectorAll('.humanCheckWarning').forEach(s=>s.remove());
+    const box=document.getElementById('requestSheetExtras')||document.querySelector('.requestSheetBox');
+    if(!box)return;
+    const heading=[...box.querySelectorAll('h4,h3')].find(h=>h.textContent.includes('依頼票の選択項目'));
+    if(!heading)return;
+    const s=document.createElement('span');
+    s.className='humanCheckWarning';
+    s.textContent='人が確認記入！';
+    s.style.cssText='color:#d92d20;font-weight:900;margin-left:10px;font-size:14px;white-space:nowrap';
+    heading.appendChild(s);
   }
   function simpleSelect(inputId,choices){
     const input=document.getElementById(inputId);if(!input)return;
