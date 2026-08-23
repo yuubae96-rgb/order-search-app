@@ -1,0 +1,35 @@
+name: Fix approval no-docs handling
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-approval-no-docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch approval detail
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('estimate-notebook2-detail.html')
+          s=p.read_text()
+          s=s.replace("function renderAttachments(){$('attachments').innerHTML=attachments.length?attachments.map(a=>'<div class=\"att\"><div class=\"attName\">'+esc(a.file_kind||'資料')+'：'+esc(a.file_name)+'</div><div class=\"attActions\"><button class=\"btn gray small\" onclick=\"openAttachment('+a.id+')\">見る</button><button class=\"btn red small\" onclick=\"deleteAttachment('+a.id+')\">削除</button></div></div>').join(''):'<div class=\"help\">添付資料がありません。添付がない案件は承認できません。</div>';}","function renderAttachments(){const noDocs=data?.submitted_snapshot?.no_support_needed===true;$('attachments').innerHTML=attachments.length?attachments.map(a=>'<div class=\"att\"><div class=\"attName\">'+esc(a.file_kind||'資料')+'：'+esc(a.file_name)+'</div><div class=\"attActions\"><button class=\"btn gray small\" onclick=\"openAttachment('+a.id+')\">見る</button><button class=\"btn red small\" onclick=\"deleteAttachment('+a.id+')\">削除</button></div></div>').join(''):(noDocs?'<div class=\"help\" style=\"color:#11623e;font-weight:900\">今回必要資料無しとして申請されています。</div>':'<div class=\"help\">添付資料がありません。</div>');}")
+          s=s.replace("await save(true);if(!attachments.length)throw Error('添付資料がないため承認できません');await api(AFN,{action:'approve',id,note:n});","await save(true);const noDocs=data?.submitted_snapshot?.no_support_needed===true;if(!attachments.length&&!noDocs)throw Error('添付資料がないため承認できません');await api(AFN,{action:'approve',id,note:n});")
+          s=s.replace("async function resubmit(){let due=val('approval_due_date');if(!due)return alert('承認希望期限を入力してください');if(!attachments.length)return alert('承認に必要な添付資料を追加してください');try{await save(true);await api(AFN,{action:'resubmit',id,approval_due_date:due});alert('再申請しました');back()}catch(e){alert(e.message)}}","async function resubmit(){let due=val('approval_due_date');if(!due)return alert('承認希望期限を入力してください');const noDocs=data?.submitted_snapshot?.no_support_needed===true;if(!attachments.length&&!noDocs)return alert('承認に必要な添付資料を追加してください');try{await save(true);await api(AFN,{action:'resubmit',id,approval_due_date:due,no_support_needed:noDocs});alert('再申請しました');back()}catch(e){alert(e.message)}}")
+          p.write_text(s)
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add estimate-notebook2-detail.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Allow approval when no supporting documents were declared"
+          git push
