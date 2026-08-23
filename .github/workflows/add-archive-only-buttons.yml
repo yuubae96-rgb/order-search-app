@@ -1,0 +1,81 @@
+name: Add archive-only buttons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-archive-only-buttons.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[archive-button-patch]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch archive-only buttons
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          core = Path('estimate-notebook2-core.html')
+          s = core.read_text()
+          marker = "archiveOnlyBtn"
+          if marker not in s:
+              anchor = "    t=t.replace(\"detail_sheet_present:'詳細別紙'\",\"detail_sheet_present:'詳細別紙(要確認)'\");\n"
+              insert = anchor + "    t=t.replace('<button class=\"btn primary\" id=\"analyzeBtn\">AIで読み取る</button>','<button class=\"btn primary\" id=\"analyzeBtn\">AIで読み取る</button><button class=\"btn gray\" id=\"archiveOnlyBtn\" type=\"button\">原本画像を保管するだけ</button>');\n"
+              if anchor not in s:
+                  raise SystemExit('core anchor 1 not found')
+              s = s.replace(anchor, insert, 1)
+
+              anchor2 = "      'function operatorName(){try{var o=parent&&parent!==window&&typeof parent.getCurrentOperator===\"function\"?parent.getCurrentOperator():null;return o&&o.name?String(o.name):\"\";}catch(e){return \"\"}}'+\n"
+              add = anchor2 + "      'async function archiveOnly(){var f=document.getElementById(\"file\")?.files?.[0];if(!f)return alert(\"原本を選んでください\");var b=document.getElementById(\"archiveOnlyBtn\");try{b.disabled=true;b.textContent=\"保管中…\";await api(\"https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-archive\",{file_name:f.name,mime_type:f.type||\"application/octet-stream\",base64:await file64(f),person_in_charge:operatorName()});alert(\"原本を見積保管庫に保管しました\");document.getElementById(\"file\").value=\"\";if(typeof load===\"function\")await load()}catch(e){alert(e.message)}finally{b.disabled=false;b.textContent=\"原本画像を保管するだけ\"}}'+\n"
+              if anchor2 not in s:
+                  raise SystemExit('core anchor 2 not found')
+              s = s.replace(anchor2, add, 1)
+
+              anchor3 = "      'setInterval(addDeletes,700);setInterval(patchTopButton,700);addDeletes();patchTopButton();installProgress();'+\n"
+              repl3 = "      'setInterval(addDeletes,700);setInterval(patchTopButton,700);addDeletes();patchTopButton();installProgress();var aob=document.getElementById(\"archiveOnlyBtn\");if(aob)aob.onclick=archiveOnly;'+\n"
+              if anchor3 not in s:
+                  raise SystemExit('core anchor 3 not found')
+              s = s.replace(anchor3, repl3, 1)
+              core.write_text(s)
+
+          batch = Path('estimate-notebook2-batch.html')
+          b = batch.read_text()
+          if 'archiveOnly' not in b:
+              old = '<button id="start" class="btn blue" style="margin-top:10px">一括AI読み取り</button><div id="progress"'
+              new = '<button id="start" class="btn blue" style="margin-top:10px">一括AI読み取り</button><button id="archiveOnly" class="btn gray" style="margin-top:10px;margin-left:8px">原本画像を保管するだけ</button><div id="progress"'
+              if old not in b:
+                  raise SystemExit('batch button anchor not found')
+              b = b.replace(old,new,1)
+
+              old2 = "const BFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-batch',FN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-ai',AFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-approval';"
+              new2 = old2[:-1] + ",ARFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-archive';"
+              if old2 not in b:
+                  raise SystemExit('batch const anchor not found')
+              b = b.replace(old2,new2,1)
+
+              old3 = "function b64(f){return new Promise((ok,ng)=>{let r=new FileReader;r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=ng;r.readAsDataURL(f)})}"
+              new3 = old3 + "function operatorName(){try{let o=parent&&parent!==window&&typeof parent.getCurrentOperator==='function'?parent.getCurrentOperator():null;return o&&o.name?String(o.name):''}catch{return''}}"
+              if old3 not in b:
+                  raise SystemExit('batch helper anchor not found')
+              b = b.replace(old3,new3,1)
+
+              old4 = "$('start').onclick=async()=>{"
+              new4 = "$('archiveOnly').onclick=async()=>{let f=$('pdf').files[0];if(!f)return alert('PDFを選択してください');if(!confirm('このPDFはAIで読み取らず、原本だけ見積保管庫へ保管しますか？'))return;try{$('archiveOnly').disabled=true;$('archiveOnly').textContent='保管中…';await api(ARFN,{file_name:f.name,mime_type:f.type||'application/pdf',base64:await b64(f),person_in_charge:operatorName()});alert('原本PDFを見積保管庫に保管しました');$('pdf').value=''}catch(e){alert(e.message)}finally{$('archiveOnly').disabled=false;$('archiveOnly').textContent='原本画像を保管するだけ'}};" + old4
+              if old4 not in b:
+                  raise SystemExit('batch handler anchor not found')
+              b = b.replace(old4,new4,1)
+              batch.write_text(b)
+          PY
+      - name: Commit patch
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "OpenAI"
+          git config user.email "actions@users.noreply.github.com"
+          git add estimate-notebook2-core.html estimate-notebook2-batch.html
+          git commit -m "Add archive-only estimate storage [archive-button-patch]"
+          git push
