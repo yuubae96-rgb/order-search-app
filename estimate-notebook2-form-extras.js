@@ -10,11 +10,21 @@
   function installDueDateHint(){
     const input=document.getElementById('approvalDueDate');
     if(!input||document.getElementById('approvalDueDateHint'))return;
-    const hint=document.createElement('div');
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:relative';
+    input.parentNode.insertBefore(wrap,input);
+    wrap.appendChild(input);
+    const hint=document.createElement('span');
     hint.id='approvalDueDateHint';
     hint.textContent='回答・承認希望の日付を選択';
-    hint.style.cssText='color:#9aa6b2;font-size:13px;font-weight:700;margin:2px 0 6px';
-    input.insertAdjacentElement('beforebegin',hint);
+    hint.style.cssText='position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#a8b1bb;font-size:15px;font-weight:600;pointer-events:none;white-space:nowrap';
+    wrap.appendChild(hint);
+    const sync=()=>{hint.style.display=input.value?'none':'block'};
+    input.addEventListener('input',sync);
+    input.addEventListener('change',sync);
+    input.addEventListener('focus',sync);
+    input.addEventListener('blur',sync);
+    sync();
   }
   function installColorField(){
     if(document.getElementById('color_count'))return;
