@@ -21,13 +21,27 @@
     d.querySelector('input').addEventListener('input',()=>{if(d.querySelector('input').value!==''){d.dataset.checked='1';d.style.background='';b.remove()}});
     color.insertAdjacentElement('afterend',d);
   }
+  function installHumanWarnings(){
+    const targets=['detail_sheet_present','separate_drawing_present'];
+    targets.forEach(id=>{
+      const d=document.querySelector('[data-field="'+id+'"]');
+      if(!d)return;
+      const label=d.querySelector('label');
+      if(!label||label.querySelector('.humanCheckWarning'))return;
+      const s=document.createElement('span');
+      s.className='humanCheckWarning';
+      s.textContent='人が確認記入！';
+      s.style.cssText='color:#d92d20;font-weight:900;margin-left:10px;font-size:14px;white-space:nowrap';
+      label.appendChild(s);
+    });
+  }
   const prevFill=window.fill;
-  if(typeof prevFill==='function')window.fill=function(p){const r=prevFill(p);installColorField();installNoDocs();return r};
+  if(typeof prevFill==='function')window.fill=function(p){const r=prevFill(p);installColorField();installNoDocs();installHumanWarnings();return r};
   const prevCurrent=window.current;
   if(typeof prevCurrent==='function')window.current=function(){const p=prevCurrent();const e=document.getElementById('color_count');p.color_count=e&&e.value!==''?Number(e.value):null;return p};
   const prevReset=window.resetRead;
   if(typeof prevReset==='function')window.resetRead=function(){const r=prevReset();const c=document.getElementById('noSupportNeeded');if(c)c.checked=false;return r};
-  installNoDocs();
+  installNoDocs();installHumanWarnings();
 
   const btn=document.getElementById('confirmBtn');
   if(btn){
