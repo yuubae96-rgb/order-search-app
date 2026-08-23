@@ -69,6 +69,9 @@
   }
   function simplifyPlateFee(p){
     const yes=document.getElementById('plateFeeYes'),no=document.getElementById('plateFeeNo'),amount=document.getElementById('plate_fee');if(!yes||!no||!amount)return;
+    const plateField=amount.closest('[data-field="plate_fee"]');
+    const plateLabel=plateField&&plateField.querySelector('label');
+    if(plateLabel)plateLabel.textContent='原版代(確認・手入力)';
     yes.type='radio';no.type='radio';yes.name='plateFeeChoice';no.name='plateFeeChoice';
     const choices=yes.closest('.plateFeeChoices');if(choices){choices.style.gap='8px';choices.querySelectorAll('label').forEach(l=>{l.style.cssText='display:flex;align-items:center;gap:7px;padding:10px 14px;border:2px solid #cfd8df;border-radius:10px;font-size:15px;font-weight:900;background:#fff'})}
     if(p&&p.plate_fee_present===true)yes.checked=true;
