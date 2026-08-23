@@ -141,3 +141,20 @@
   const prevMatch=window.match;
   if(typeof prevMatch==='function')window.match=function(x){if(typeof filter!=='undefined'&&filter==='差戻し')return x.workflow_status==='差戻し';return prevMatch(x)};
 })();
+
+(function(){
+  if(parent===window)return;
+  const OFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-operators';
+  const pd=parent.document;
+  const owner=()=>{try{return parent.getCurrentOperator&&parent.getCurrentOperator()?.name==='承認(社長)'}catch(e){return false}};
+  const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+  const jp=v=>{try{return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch(e){return v}};
+  async function historyApi(body){body=Object.assign({},body,{actor_name:owner()?'承認(社長)':''});const r=await fetch(OFN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const j=await r.json();if(!r.ok)throw Error(j.error||'処理失敗');return j}
+  const historyNav=()=>[...pd.querySelectorAll('.nav')].find(x=>x.dataset.pane==='history');
+  function syncPermission(){const n=historyNav();if(n)n.classList.toggle('locked',!owner());const pane=pd.getElementById('history');if(pane&&!owner()&&pane.classList.contains('active')){try{parent.showPane('app')}catch(e){}}}
+  const nav=historyNav();if(nav&&!nav.dataset.ownerOnlyBound){nav.dataset.ownerOnlyBound='1';nav.addEventListener('click',e=>{if(owner())return;e.preventDefault();e.stopImmediatePropagation();alert('操作履歴は「承認(社長)」のみ閲覧できます。')},true)}
+  async function loadOwnerLogs(){if(!owner())return alert('操作履歴は「承認(社長)」のみ閲覧できます。');const logs=pd.getElementById('logs');if(!logs)return;try{const j=await historyApi({action:'list_logs',limit:500}),a=j.items||[];logs.innerHTML=a.length?a.map(x=>{const e=x.estimate_notebook2||{},target=[e.company_name,e.product_name].filter(Boolean).join(' / ');return '<div class="log"><div class="row"><div class="grow"><div class="time">'+jp(x.created_at)+'　'+esc(x.operator_name)+'</div><div class="action">'+esc(x.action)+'</div>'+(target?'<div class="target">'+esc(target)+'</div>':'')+(x.details?'<div class="role">'+esc(x.details)+'</div>':'')+'</div><button class="btn red historyDeleteOne" data-log-id="'+x.id+'" type="button">削除</button></div></div>'}).join(''):'<div class="empty">まだ履歴はありません。</div>';logs.querySelectorAll('.historyDeleteOne').forEach(b=>b.onclick=async()=>{if(!confirm('この操作履歴を1件削除しますか？'))return;try{await historyApi({action:'delete_log',id:Number(b.dataset.logId)});await loadOwnerLogs()}catch(e){alert(e.message)}})}catch(e){logs.textContent=e.message}}
+  function installBulk(){const history=pd.getElementById('history');if(!history)return;const row=history.querySelector('.card .row');if(!row||pd.getElementById('deleteAllLogs'))return;const b=pd.createElement('button');b.id='deleteAllLogs';b.type='button';b.className='btn red';b.textContent='履歴を一括削除';b.onclick=async()=>{if(!owner())return alert('操作履歴の削除は「承認(社長)」のみ実行できます。');if(!confirm('操作履歴をすべて削除しますか？\nこの操作は元に戻せません。'))return;try{await historyApi({action:'delete_all_logs'});await loadOwnerLogs();alert('操作履歴をすべて削除しました')}catch(e){alert(e.message)}};row.appendChild(b);const reload=pd.getElementById('reloadLogs');if(reload)reload.onclick=loadOwnerLogs}
+  try{parent.loadLogs=loadOwnerLogs}catch(e){}
+  installBulk();syncPermission();setInterval(()=>{installBulk();syncPermission()},600);
+})();
