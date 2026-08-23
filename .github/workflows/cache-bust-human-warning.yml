@@ -1,0 +1,35 @@
+name: Cache bust human warning placement
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cache-bust-human-warning.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update form extras cache key
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('estimate-notebook2-core.html')
+          s=p.read_text()
+          old='estimate-notebook2-form-extras.js?v=20260823-nodocsfix4'
+          new='estimate-notebook2-form-extras.js?v=20260823-humanheading1'
+          if old not in s:
+              raise SystemExit('target cache key not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Commit cache bust
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add estimate-notebook2-core.html
+          git commit -m "Refresh request sheet human warning UI"
+          git push
