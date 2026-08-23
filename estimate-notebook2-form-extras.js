@@ -7,6 +7,15 @@
     host.innerHTML='<input id="noSupportNeeded" type="checkbox" style="width:24px;height:24px;margin:0">今回必要資料無し';
     box.appendChild(host);
   }
+  function installDueDateHint(){
+    const input=document.getElementById('approvalDueDate');
+    if(!input||document.getElementById('approvalDueDateHint'))return;
+    const hint=document.createElement('div');
+    hint.id='approvalDueDateHint';
+    hint.textContent='回答・承認希望の日付を選択';
+    hint.style.cssText='color:#9aa6b2;font-size:13px;font-weight:700;margin:2px 0 6px';
+    input.insertAdjacentElement('beforebegin',hint);
+  }
   function installColorField(){
     if(document.getElementById('color_count'))return;
     const color=document.querySelector('[data-field="color_text"]');
@@ -65,12 +74,12 @@
     simplifyPlateFee(p||{});
   }
   const prevFill=window.fill;
-  if(typeof prevFill==='function')window.fill=function(p){const r=prevFill(p);installColorField();installNoDocs();installHumanWarnings();simplifyInputs(p||{});return r};
+  if(typeof prevFill==='function')window.fill=function(p){const r=prevFill(p);installColorField();installNoDocs();installDueDateHint();installHumanWarnings();simplifyInputs(p||{});return r};
   const prevCurrent=window.current;
   if(typeof prevCurrent==='function')window.current=function(){const p=prevCurrent();const e=document.getElementById('color_count');p.color_count=e&&e.value!==''?Number(e.value):null;return p};
   const prevReset=window.resetRead;
   if(typeof prevReset==='function')window.resetRead=function(){const r=prevReset();const c=document.getElementById('noSupportNeeded');if(c)c.checked=false;return r};
-  installNoDocs();installHumanWarnings();
+  installNoDocs();installDueDateHint();installHumanWarnings();
 
   async function submitWithNoDocsSupport(e){
     if(e){e.preventDefault();e.stopImmediatePropagation();}
