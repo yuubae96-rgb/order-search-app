@@ -1,0 +1,45 @@
+name: Patch estimate request fields
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-estimate-request-fields.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch estimate-notebook2-core.html
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('estimate-notebook2-core.html')
+          s = p.read_text()
+
+          old = """function isBlank(v){return v===null||v===undefined||String(v).trim()===''}
+function fill(p){let aiBad=(p.uncertain_fields||[]).filter(k=>KEYS.includes(k));let emptyBad=KEYS.filter(k=>k!=='plate_fee'&&isBlank(p[k]));let bad=[...new Set([...aiBad,...emptyBad])];$('warnings').innerHTML=bad.length?'<div class=\"warnBox\">赤い項目は、AIが読み取れなかったか空欄です。原本を確認し、内容を入力するか「確認済みにする」を押してください。</div>':'';$('fields').innerHTML='';KEYS.forEach(k=>{if(k==='plate_fee'){let s=document.createElement('div');s.className='priceSection';s.innerHTML='<h4>数量別単価</h4><div id=\"prices\"></div><button class=\"btn gray\" id=\"addPrice\">＋ 数量行を追加</button>';$('fields').appendChild(s)}$('fields').appendChild(field(k,p,bad.includes(k)))});(p.prices||[]).forEach(addPriceRow);if(!(p.prices||[]).length)addPriceRow({});$('addPrice').onclick=()=>addPriceRow({})}
+function current(){let p={};KEYS.forEach(k=>p[k]=$(k).value);['width','height','plate_fee'].forEach(k=>p[k]=p[k]===''?null:Number(p[k]));p.plate_fee_present=$('plateFeeYes')?.checked?true:$('plateFeeNo')?.checked?false:null;p.prices=[...document.querySelectorAll('.priceRow')].map(r=>({quantity:r.querySelector('.qty').value||null,unit_price:r.querySelector('.unit').value||null,amount:r.querySelector('.amt').value||null}));return p}"""
+
+          new = """function isBlank(v){return v===null||v===undefined||String(v).trim()===''}
+const EXTRA_LABEL={request_type:'依頼種別',previous_unit_price_present:'以前の単価・近い図面の単価',detail_sheet_present:'詳細別紙',sample_present:'サンプル',separate_drawing_present:'別紙図面に記入',separate_drawing_kind:'別紙図面（単・継・不明）',order_probability:'受注確率',stock_present:'在庫'};
+function extraSelect(k,p,bad){let d=document.createElement('div');d.className='field';d.dataset.field=k;let l=document.createElement('label');l.textContent=EXTRA_LABEL[k];d.appendChild(l);let el=document.createElement('select');el.id=k;let options=[];if(k==='request_type')options=[['','未確認'],['見積','見積'],['単価','単価'],['注文予定見積','注文予定見積']];else if(k==='separate_drawing_kind')options=[['','未確認'],['単','単'],['継','継'],['不明','不明']];else if(k==='order_probability')options=[['','未確認'],['1','1'],['2','2'],['3','3'],['4','4'],['5','5']];else options=[['','未確認'],['true','有'],['false','無']];el.innerHTML=options.map(x=>'<option value=\"'+x[0]+'\">'+x[1]+'</option>').join('');let v=p[k];if(typeof v==='boolean')el.value=v?'true':'false';else el.value=v??'';d.appendChild(el);if(bad){d.style.background='#fff5f4';d.style.padding='6px';d.style.borderRadius='9px';let b=document.createElement('button');b.className='btn gray';b.type='button';b.textContent='確認済みにする';b.onclick=()=>{d.dataset.checked='1';d.style.background='';b.remove()};d.appendChild(b);el.onchange=()=>{if(el.value!==''){d.dataset.checked='1';d.style.background='';b.remove()}}}return d}
+function extraSection(p){const keys=Object.keys(EXTRA_LABEL),unc=new Set(p.uncertain_fields||[]);let box=document.createElement('div');box.className='priceSection';box.id='requestSheetExtras';box.innerHTML='<h4 style=\"margin:14px 0 4px\">依頼票の選択項目</h4><div class=\"sub\" style=\"margin-bottom:6px\">丸・囲み・チェックをAIが読み取った結果です。</div>';keys.forEach(k=>box.appendChild(extraSelect(k,p,unc.has(k)||isBlank(p[k]))));return box}
+function fill(p){let aiBad=(p.uncertain_fields||[]).filter(k=>KEYS.includes(k));let emptyBad=KEYS.filter(k=>k!=='plate_fee'&&isBlank(p[k]));let extraBad=Object.keys(EXTRA_LABEL).filter(k=>(p.uncertain_fields||[]).includes(k)||isBlank(p[k]));let bad=[...new Set([...aiBad,...emptyBad])];$('warnings').innerHTML=(bad.length||extraBad.length)?'<div class=\"warnBox\">赤い項目は、AIが読み取れなかったか空欄です。原本を確認し、内容を選ぶ・入力するか「確認済みにする」を押してください。</div>':'';$('fields').innerHTML='';KEYS.forEach(k=>{if(k==='plate_fee'){let s=document.createElement('div');s.className='priceSection';s.innerHTML='<h4>数量別単価</h4><div id=\"prices\"></div><button class=\"btn gray\" id=\"addPrice\">＋ 数量行を追加</button>';$('fields').appendChild(s)}$('fields').appendChild(field(k,p,bad.includes(k)));if(k==='product_name')$('fields').appendChild(extraSection(p))});(p.prices||[]).forEach(addPriceRow);if(!(p.prices||[]).length)addPriceRow({});$('addPrice').onclick=()=>addPriceRow({})}
+function current(){let p={};KEYS.forEach(k=>p[k]=$(k).value);['width','height','plate_fee'].forEach(k=>p[k]=p[k]===''?null:Number(p[k]));p.plate_fee_present=$('plateFeeYes')?.checked?true:$('plateFeeNo')?.checked?false:null;const boolVal=id=>$(id)?.value==='true'?true:$(id)?.value==='false'?false:null;p.request_type=$('request_type')?.value||null;p.previous_unit_price_present=boolVal('previous_unit_price_present');p.detail_sheet_present=boolVal('detail_sheet_present');p.sample_present=boolVal('sample_present');p.separate_drawing_present=boolVal('separate_drawing_present');p.separate_drawing_kind=$('separate_drawing_kind')?.value||null;p.order_probability=$('order_probability')?.value?Number($('order_probability').value):null;p.stock_present=boolVal('stock_present');p.prices=[...document.querySelectorAll('.priceRow')].map(r=>({quantity:r.querySelector('.qty').value||null,unit_price:r.querySelector('.unit').value||null,amount:r.querySelector('.amt').value||null}));return p}"""
+
+          if old not in s:
+              raise SystemExit('target block not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+      - name: Commit patched UI
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add estimate-notebook2-core.html
+          git commit -m "Show AI-read request sheet fields in review UI"
+          git push
