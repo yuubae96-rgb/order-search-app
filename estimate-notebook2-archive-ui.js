@@ -99,3 +99,8 @@
   }
   setInterval(sync,400);setTimeout(sync,50);
 })();
+
+(function(){
+  const h=[...document.querySelectorAll('h3')].find(x=>x.textContent.trim()==='③ 見積保管庫');
+  if(h)h.textContent='③ 見積保管庫(見積りノート)';
+})();
