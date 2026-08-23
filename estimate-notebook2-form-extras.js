@@ -66,4 +66,39 @@
       }catch(e){alert(e.message)}finally{btn.disabled=false;btn.textContent='この内容で申請する'}
     };
   }
+
+  const LFN='https://vnnvuxccazkdzwqjmntz.supabase.co/functions/v1/estimate-notebook2-lower-choice';
+  const analyzeBtn=document.getElementById('analyzeBtn');
+  if(analyzeBtn&&typeof analyzeBtn.onclick==='function'&&!analyzeBtn.dataset.lowerFinalWrapped){
+    const oldAnalyze=analyzeBtn.onclick;
+    analyzeBtn.dataset.lowerFinalWrapped='1';
+    analyzeBtn.onclick=async function(){
+      const f=document.getElementById('file')?.files?.[0];
+      let lowerPromise=null;
+      if(f){
+        lowerPromise=(async()=>{
+          const base64=await file64(f);
+          return await api(LFN,{file_name:f.name,mime_type:f.type||'application/octet-stream',base64});
+        })();
+      }
+      const r=await oldAnalyze.apply(this,arguments);
+      if(lowerPromise&&typeof analyzed!=='undefined'&&analyzed?.parsed&&!document.getElementById('reviewCard')?.classList.contains('hidden')){
+        const progress=document.getElementById('progress');
+        try{
+          if(progress){progress.innerHTML='<div class="aiProgressBox"><div class="aiProgressMain">下段の丸印を最終確認中…</div><div class="aiProgressTime">以前の単価・詳細別紙・サンプル・受注確率・在庫などを確認しています</div><div class="aiProgressBar"><span style="width:92%"></span></div></div>';progress.classList.remove('hidden')}
+          const j=await lowerPromise;
+          const q=j&&j.parsed?j.parsed:{};
+          const keys=['previous_unit_price_present','detail_sheet_present','sample_present','separate_drawing_present','separate_drawing_kind','order_probability','stock_present'];
+          for(const k of keys){
+            if(q[k]!==null&&q[k]!==undefined&&q[k]!==''){
+              analyzed.parsed[k]=q[k];
+              if(Array.isArray(analyzed.parsed.uncertain_fields))analyzed.parsed.uncertain_fields=analyzed.parsed.uncertain_fields.filter(x=>x!==k);
+            }
+          }
+          fill(analyzed.parsed);
+        }catch(e){console.warn('lower choice confirmation failed',e)}finally{if(progress)progress.classList.add('hidden')}
+      }
+      return r;
+    };
+  }
 })();
