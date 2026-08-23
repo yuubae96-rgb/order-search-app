@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/patch-estimate-request-fields.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
