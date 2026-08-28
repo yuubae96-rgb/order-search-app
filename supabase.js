@@ -2,57 +2,92 @@
 
 const SUPABASE_URL = 'https://vnnvuxccazkdzwqjmntz.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_xG-tuBgxFGntT1vlbZzuVQ_AZ2Zl8QL';
+const SECURE_AUTH_MODE = new URLSearchParams(location.search).get('secure') === '1';
 
-// ログイン機能は使わない。過去の期限切れJWTが残っていると401になるため、
-// このSupabaseプロジェクトの認証情報を起動時に削除する。
-(function clearLegacyAuthStorage(){
-  const projectRef='vnnvuxccazkdzwqjmntz';
-  [window.localStorage,window.sessionStorage].forEach(storage=>{
-    try{
-      for(let i=storage.length-1;i>=0;i--){
-        const key=storage.key(i)||'';
-        if(key.includes(projectRef)&&/auth|token/i.test(key)) storage.removeItem(key);
-      }
-    }catch(_e){}
-  });
-})();
-
-const supabaseClient=window.supabase.createClient(
+// 移行期間は通常URLを止めず、?secure=1 のときだけ本物のログインを必須にする。
+// 一度本物のSupabase Authでログインした端末はセッションを保持し、通常URLでも
+// その実セッションを優先して使う。未移行端末だけ従来のanon通信へフォールバックする。
+const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY,
   {
-    auth:{
-      persistSession:false,
-      autoRefreshToken:false,
-      detectSessionInUrl:false
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
     }
   }
 );
-window.supabaseClient=supabaseClient;
+window.supabaseClient = supabaseClient;
 
-// 既存app.jsとの互換用。画面上はログイン済み扱いにするが、
-// access_tokenは持たせないためREST通信はpublishable key（anon）で行う。
-const NO_LOGIN_SESSION={
-  user:{id:'no-login',email:'ログイン不要'},
-  access_token:null,
-  refresh_token:null
+const realAuth = {
+  getSession: supabaseClient.auth.getSession.bind(supabaseClient.auth),
+  getUser: supabaseClient.auth.getUser.bind(supabaseClient.auth),
+  onAuthStateChange: supabaseClient.auth.onAuthStateChange.bind(supabaseClient.auth),
+  signOut: supabaseClient.auth.signOut.bind(supabaseClient.auth)
 };
 
-supabaseClient.auth.getSession=async()=>({data:{session:NO_LOGIN_SESSION},error:null});
-supabaseClient.auth.getUser=async()=>({data:{user:NO_LOGIN_SESSION.user},error:null});
-supabaseClient.auth.onAuthStateChange=()=>({data:{subscription:{unsubscribe(){}}}});
-supabaseClient.auth.signOut=async()=>({error:null});
+const NO_LOGIN_SESSION = {
+  user: { id: 'no-login', email: 'ログイン不要' },
+  access_token: null,
+  refresh_token: null
+};
 
-// 旧コード互換。認証更新は行わず匿名キーを使う。
-window.getFreshSupabaseAccessToken=async()=>SUPABASE_PUBLISHABLE_KEY;
-window.invalidateExpiredSupabaseSession=async()=>null;
+async function getRealSession(){
+  try {
+    const r = await realAuth.getSession();
+    if (r?.data?.session) window.__companyRealAuthActive = true;
+    return r;
+  } catch (e) {
+    return { data: { session: null }, error: e };
+  }
+}
+
+supabaseClient.auth.getSession = async () => {
+  const r = await getRealSession();
+  if (r?.data?.session) return r;
+  if (SECURE_AUTH_MODE) return r;
+  return { data: { session: NO_LOGIN_SESSION }, error: null };
+};
+
+supabaseClient.auth.getUser = async () => {
+  const s = await getRealSession();
+  if (s?.data?.session) {
+    const r = await realAuth.getUser();
+    if (!r?.error && r?.data?.user) window.__companyRealAuthActive = true;
+    return r;
+  }
+  if (SECURE_AUTH_MODE) return { data: { user: null }, error: null };
+  return { data: { user: NO_LOGIN_SESSION.user }, error: null };
+};
+
+// secure移行画面では通常のAuthイベントを使う。通常画面では既存挙動を維持して
+// 未移行端末が突然ログイン画面へ戻されないようにする。
+supabaseClient.auth.onAuthStateChange = SECURE_AUTH_MODE
+  ? realAuth.onAuthStateChange
+  : (() => ({ data: { subscription: { unsubscribe(){} } } }));
+
+supabaseClient.auth.signOut = async (...args) => {
+  const s = await getRealSession();
+  if (s?.data?.session || SECURE_AUTH_MODE) {
+    window.__companyRealAuthActive = false;
+    return realAuth.signOut(...args);
+  }
+  return { error: null };
+};
+
+window.getFreshSupabaseAccessToken = async () => {
+  const r = await getRealSession();
+  return r?.data?.session?.access_token || SUPABASE_PUBLISHABLE_KEY;
+};
+window.invalidateExpiredSupabaseSession = async () => null;
+window.companySecureAuthMode = SECURE_AUTH_MODE;
 
 function loadCompanyModule(src){const s=document.createElement('script');s.src=src;s.async=false;document.head.appendChild(s);}
 loadCompanyModule('nameplate-integration.js?v=20260819-0025');
 loadCompanyModule('cost-master.js?v=20260819-0035');
 loadCompanyModule('workforce-cost.js?v=20260819-0040');
 loadCompanyModule('management-hub.js?v=20260819-0130');
-// ログイン・ユーザー権限管理は使用しない。
 loadCompanyModule('factory-mode.js?v=20260819-0085');
 loadCompanyModule('stock-alerts.js?v=20260819-0090');
 loadCompanyModule('price-link.js?v=20260819-0095');
