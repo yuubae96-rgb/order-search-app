@@ -50,7 +50,12 @@
     return safeLoadPromise;
   };
 
-  // ログイン画面は使用しない。
+  // ?secure=1 では本物のログイン画面を絶対に隠さない。
+  if(window.companySecureAuthMode){
+    return;
+  }
+
+  // 移行中の通常URLだけは従来どおりログイン画面を隠し、業務を止めない。
   const hideLoginUI=()=>{
     const gate=document.getElementById('authGate');
     if(gate){
@@ -66,7 +71,6 @@
   hideLoginUI();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hideLoginUI);
 
-  // app.jsの初期化がログイン判定で止まっていた場合に、匿名接続で再読込する。
   setTimeout(async()=>{
     hideLoginUI();
     try{
