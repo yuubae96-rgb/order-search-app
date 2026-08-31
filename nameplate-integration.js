@@ -14,7 +14,10 @@
       .np-overlay.on{display:flex}
       .np-head{height:58px;flex:0 0 58px;background:#171c24;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 14px;padding-top:env(safe-area-inset-top)}
       .np-head b{font-size:16px}.np-close{border:0;background:transparent;color:#fff;font-size:30px;line-height:1;width:44px;height:44px}
-      .np-frame{border:0;width:100%;flex:1;background:#fff}
+      .np-frame-wrap{position:relative;flex:1;background:#fff;min-height:0}
+      .np-frame{border:0;width:100%;height:100%;display:block;background:#fff}
+      .np-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;color:#667085;font-size:14px;z-index:1;pointer-events:none}
+      .np-loading.done{display:none}
     `;
     document.head.appendChild(style);
 
@@ -28,14 +31,35 @@
     const overlay=document.createElement('div');
     overlay.className='np-overlay';
     overlay.id='nameplateEstimatorOverlay';
-    overlay.innerHTML=`<div class="np-head"><b>銘板自動見積・単価設定</b><button type="button" class="np-close" id="closeNameplateEstimator">×</button></div><iframe class="np-frame" id="nameplateEstimatorFrame" src="about:blank"></iframe>`;
+    overlay.innerHTML=`<div class="np-head"><b>銘板自動見積・単価設定</b><button type="button" class="np-close" id="closeNameplateEstimator">×</button></div><div class="np-frame-wrap"><div class="np-loading" id="nameplateEstimatorLoading">読み込み中…</div><iframe class="np-frame" id="nameplateEstimatorFrame" src="about:blank" loading="eager"></iframe></div>`;
     document.body.appendChild(overlay);
 
+    const frame=document.getElementById('nameplateEstimatorFrame');
+    const loading=document.getElementById('nameplateEstimatorLoading');
+    const estimatorUrl='https://yuubae96-rgb.github.io/nameplate-app/index.html?v=20260901-fast';
+    let preloadStarted=false;
+
+    function preloadEstimator(){
+      if(preloadStarted) return;
+      preloadStarted=true;
+      frame.src=estimatorUrl;
+    }
+
+    frame.addEventListener('load',()=>{
+      if(frame.src && frame.src!=='about:blank') loading.classList.add('done');
+    });
+
+    // 画面表示直後の操作を邪魔しない範囲で先読みしておく。
+    // ユーザーがボタンを押す頃には iframe の読み込みが終わっているため、
+    // 白画面で待たされる時間を大幅に減らせる。
+    if('requestIdleCallback' in window){
+      requestIdleCallback(preloadEstimator,{timeout:1200});
+    }else{
+      setTimeout(preloadEstimator,250);
+    }
+
     document.getElementById('openNameplateEstimator').addEventListener('click',()=>{
-      const frame=document.getElementById('nameplateEstimatorFrame');
-      if(frame.src==='about:blank' || !frame.src.includes('/nameplate-app/')){
-        frame.src='https://yuubae96-rgb.github.io/nameplate-app/index.html?v=20260819';
-      }
+      preloadEstimator();
       overlay.classList.add('on');
       document.body.style.overflow='hidden';
     });
