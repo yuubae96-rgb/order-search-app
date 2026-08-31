@@ -36,6 +36,35 @@
     const scroller=document.getElementById('nameplateEstimatorScroll');
     let heightTimer=0;
 
+    function applyRequestedPriceSettings(){
+      try{
+        const key='meiban-price-settings';
+        const raw=localStorage.getItem(key);
+        if(!raw) return;
+        const settings=JSON.parse(raw);
+        let changed=false;
+
+        if(settings.platePrice!==9500){
+          settings.platePrice=9500;
+          changed=true;
+        }
+
+        if(Array.isArray(settings.materials)){
+          const aluminum=settings.materials.find(m=>m && m.name==='アルミ');
+          if(aluminum && Array.isArray(aluminum.thicknesses)){
+            const exists=aluminum.thicknesses.some(t=>Math.abs(Number(t.mm)-0.15)<0.000001);
+            if(!exists){
+              aluminum.thicknesses.push({mm:0.15,price:0.15});
+              aluminum.thicknesses.sort((a,b)=>Number(a.mm)-Number(b.mm));
+              changed=true;
+            }
+          }
+        }
+
+        if(changed) localStorage.setItem(key,JSON.stringify(settings));
+      }catch(e){}
+    }
+
     function syncFrameHeight(){
       try{
         const doc=frame.contentDocument;
@@ -69,8 +98,9 @@
     });
 
     document.getElementById('openNameplateEstimator').addEventListener('click',()=>{
+      applyRequestedPriceSettings();
       if(frame.src==='about:blank' || !frame.src.includes('/nameplate-app/')){
-        frame.src='https://yuubae96-rgb.github.io/nameplate-app/index.html?v=20260901-ios-stable';
+        frame.src='https://yuubae96-rgb.github.io/nameplate-app/index.html?v=20260901-price-015';
       }
       overlay.classList.add('on');
       document.body.style.overflow='hidden';
