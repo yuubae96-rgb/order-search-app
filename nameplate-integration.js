@@ -34,7 +34,7 @@
 
     const frame=document.getElementById('nameplateEstimatorFrame');
     const scroller=document.getElementById('nameplateEstimatorScroll');
-    let resizeObserver=null;
+    let heightTimer=0;
 
     function syncFrameHeight(){
       try{
@@ -45,28 +45,32 @@
           doc.body ? doc.body.scrollHeight : 0,
           scroller.clientHeight
         );
-        if(h>0) frame.style.height=h+'px';
+        if(h>0 && Math.abs(frame.offsetHeight-h)>2) frame.style.height=h+'px';
       }catch(e){}
+    }
+
+    function scheduleHeightSync(delay){
+      clearTimeout(heightTimer);
+      heightTimer=setTimeout(syncFrameHeight,delay || 80);
     }
 
     frame.addEventListener('load',()=>{
       syncFrameHeight();
-      setTimeout(syncFrameHeight,100);
+      scheduleHeightSync(120);
       setTimeout(syncFrameHeight,500);
       try{
         const doc=frame.contentDocument;
-        if(doc && 'ResizeObserver' in window){
-          if(resizeObserver) resizeObserver.disconnect();
-          resizeObserver=new ResizeObserver(syncFrameHeight);
-          resizeObserver.observe(doc.documentElement);
-          if(doc.body) resizeObserver.observe(doc.body);
+        if(doc){
+          doc.addEventListener('click',()=>scheduleHeightSync(60),{passive:true});
+          doc.addEventListener('change',()=>scheduleHeightSync(60),{passive:true});
+          doc.addEventListener('input',()=>scheduleHeightSync(120),{passive:true});
         }
       }catch(e){}
     });
 
     document.getElementById('openNameplateEstimator').addEventListener('click',()=>{
       if(frame.src==='about:blank' || !frame.src.includes('/nameplate-app/')){
-        frame.src='https://yuubae96-rgb.github.io/nameplate-app/index.html?v=20260901-ios-scroll-fix';
+        frame.src='https://yuubae96-rgb.github.io/nameplate-app/index.html?v=20260901-ios-stable';
       }
       overlay.classList.add('on');
       document.body.style.overflow='hidden';
