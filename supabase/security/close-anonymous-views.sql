@@ -1,0 +1,1 @@
+revoke all on all tables in schema public from anon; do $b$ declare r record; begin for r in select c.relname from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='v' loop execute format('alter view public.%I set (security_invoker=true)',r.relname); end loop; end $b$;
