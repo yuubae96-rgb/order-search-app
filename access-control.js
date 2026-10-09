@@ -1,31 +1,8 @@
 (function(){
 'use strict';
 
-// 会社アプリからはログイン画面を出さず、そのまま利用できるようにする。
-function enableNoLogin(){
-  if(!window.supabaseClient){setTimeout(enableNoLogin,100);return;}
+// Authentication is required by security-auth.js and native Supabase Auth.
 
-  // app.js の初期化判定用。実際のDB通信は公開用anonキーで行う。
-  try{
-    supabaseClient.auth.getSession=async()=>({data:{session:{user:{id:'company-app',email:'company@local'},access_token:'company-app'}},error:null});
-    supabaseClient.auth.getUser=async()=>({data:{user:{id:'company-app',email:'company@local'}},error:null});
-  }catch(e){console.warn(e)}
-
-  const gate=document.getElementById('authGate');
-  if(gate){gate.classList.add('hidden');gate.style.display='none';}
-
-  // app.js が先に「未ログイン」で初期化を止めていた場合は、ここで再初期化する。
-  setTimeout(()=>{
-    const g=document.getElementById('authGate');
-    if(g){g.classList.add('hidden');g.style.display='none';}
-    try{if(typeof init==='function')init();}catch(e){console.warn('no-login init',e)}
-  },0);
-  setTimeout(()=>{
-    const g=document.getElementById('authGate');
-    if(g){g.classList.add('hidden');g.style.display='none';}
-  },300);
-}
-enableNoLogin();
 
 // 既存の部署別表示制御は、ユーザープロフィールがある場合だけ適用する。
 const DEFAULTS={owner:['register','search','analysis','settings','materials'],manager:['register','search','analysis','materials'],factory:['materials'],sales:['register','search','analysis'],office:['register','search','materials'],staff:[]};
@@ -33,7 +10,7 @@ function wait(){if(!window.supabaseClient){setTimeout(wait,200);return;}boot();}
 async function boot(){
   let user=null;
   try{const r=await supabaseClient.auth.getUser();user=r?.data?.user||null;}catch(e){}
-  if(!user||user.id==='company-app')return;
+  if(!user)return;
   const {data:profile}=await supabaseClient.from('app_users').select('role,active').eq('user_id',user.id).maybeSingle();
   if(!profile||profile.active===false)return;
   let allowed=DEFAULTS[profile.role]||[];
