@@ -33,3 +33,6 @@ end $$;
 revoke all on function public.company_security_log_access(text) from public,anon;
 grant execute on function public.company_security_log_access(text) to authenticated;
 revoke all on public.owner_password_setup_tokens from public,anon,authenticated;
+
+grant select,update on public.owner_password_setup_tokens to service_role;
+grant select on public.app_users to service_role;
